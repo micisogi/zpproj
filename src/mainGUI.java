@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class mainGUI extends JFrame{
     private JPanel mainPanel;
@@ -14,14 +16,24 @@ public class mainGUI extends JFrame{
     public mainGUI(String title){
         super(title);
 
+        generateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DSAKeyRingGenerator dsa= new DSAKeyRingGenerator();
+                try {
+                    dsa.generateDsaKeyPair(1024);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
     }
 
     public static void main(String[] args) throws Exception {
-        DSAKeyRingGenerator dsa= new DSAKeyRingGenerator();
-        dsa.generateDsaKeyPair(1024);
+
         JFrame frame = new mainGUI("ZP PROJEKAT UBI ME");
         frame.setSize(800,500);
         frame.setVisible(true);
