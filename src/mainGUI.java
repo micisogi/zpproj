@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class mainGUI extends JFrame{
+public class mainGUI extends JFrame {
     private JPanel mainPanel;
     private JTabbedPane tabbedPane1;
     private JPanel Drugi;
@@ -13,17 +13,35 @@ public class mainGUI extends JFrame{
     private JButton generateButton;
     private JTextField name;
 
-    public mainGUI(String title){
+    public mainGUI(String title) {
         super(title);
 
+        ButtonGroup algorithmChoiceButtons = new ButtonGroup();
+        algorithmChoiceButtons.add(DSARadioButton);
+        algorithmChoiceButtons.add(elGamalRadioButton);
+
+//        generateButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                DSAKeyRingGenerator dsa= new DSAKeyRingGenerator();
+//                try {
+//                    dsa.generateDsaKeyPair(1024);
+//                } catch (Exception exception) {
+//                    exception.printStackTrace();
+//                }
+//            }
+//        });
         generateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DSAKeyRingGenerator dsa= new DSAKeyRingGenerator();
-                try {
-                    dsa.generateDsaKeyPair(1024);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
+            public void actionPerformed(ActionEvent arg0) {
+                if (!email.getText().matches(Utils.EMAIL_PATTERN)) {
+                    JOptionPane.showMessageDialog(null, "Email format pogresan");
+                    return;
+                }
+                if (name.getText().isEmpty() || email.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
+                } else {
+                    System.out.println(Utils.getInstance().formatNameAndEmail(name.getText(), email.getText()));
+//                    JOptionPane.showMessageDialog(null, "Kljucevi su izgenerisani");
                 }
             }
         });
@@ -35,7 +53,7 @@ public class mainGUI extends JFrame{
     public static void main(String[] args) throws Exception {
 
         JFrame frame = new mainGUI("ZP PROJEKAT UBI ME");
-        frame.setSize(800,500);
+        frame.setSize(800, 500);
         frame.setVisible(true);
     }
 
