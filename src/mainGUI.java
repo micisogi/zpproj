@@ -8,18 +8,31 @@ public class mainGUI extends JFrame {
     private JPanel Drugi;
     private JPanel Prvi;
     private JTextField email;
-    private JRadioButton DSARadioButton;
-    private JRadioButton elGamalRadioButton;
+    private JRadioButton DSA1024;
+    private JRadioButton elGamal4096;
     private JButton generateButton;
     private JTextField name;
-    private JTable table1;
+    private JTable proba1;
+    private JRadioButton DSA2048;
+    private JRadioButton elGamal2048;
+    private JRadioButton elGamal1024;
+    private JTable jtable;
+    private JTextField sendTo;
+    private JButton sendButton;
+    private JCheckBox authenticationCheckBox;
+    private JCheckBox privacyCheckBox;
+    private JCheckBox compressionCheckBox;
+    private JTextArea message;
+    private JTextArea chipertext;
+    private JRadioButton DESRadioButton;
+    private JRadioButton IDEARadioButton;
 
     public mainGUI(String title) {
         super(title);
 
         ButtonGroup algorithmChoiceButtons = new ButtonGroup();
-        algorithmChoiceButtons.add(DSARadioButton);
-        algorithmChoiceButtons.add(elGamalRadioButton);
+        algorithmChoiceButtons.add(DSA1024);
+        algorithmChoiceButtons.add(elGamal4096);
 
 //        generateButton.addActionListener(new ActionListener() {
 //            @Override
