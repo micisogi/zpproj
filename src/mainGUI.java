@@ -12,8 +12,7 @@ public class mainGUI extends JFrame {
     private JRadioButton elGamalRadioButton;
     private JButton generateButton;
     private JTextField name;
-    private JRadioButton a1024RadioButton;
-    private JRadioButton a2048RadioButton;
+    private JTable table1;
 
     public mainGUI(String title) {
         super(title);
