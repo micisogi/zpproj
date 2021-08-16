@@ -1,4 +1,7 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,11 +15,9 @@ public class mainGUI extends JFrame {
     private JRadioButton elGamal4096;
     private JButton generateButton;
     private JTextField name;
-    private JTable proba1;
     private JRadioButton DSA2048;
     private JRadioButton elGamal2048;
     private JRadioButton elGamal1024;
-    private JTable jtable;
     private JTextField sendTo;
     private JButton sendButton;
     private JCheckBox authenticationCheckBox;
@@ -26,6 +27,9 @@ public class mainGUI extends JFrame {
     private JTextArea chipertext;
     private JRadioButton DESRadioButton;
     private JRadioButton IDEARadioButton;
+    private JTable table1;
+    private JScrollPane scrollPane;
+    private JButton deleteButton;
 
     public mainGUI(String title) {
         super(title);
@@ -45,8 +49,13 @@ public class mainGUI extends JFrame {
 //                }
 //            }
 //        });
+        initTable();
+        initDeleteButton();
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                String testStrings[] = {"Name", "Email", "Valid From", "Key-ID"};
+                model.addRow(testStrings);
                 if (!email.getText().matches(Utils.EMAIL_PATTERN)) {
                     JOptionPane.showMessageDialog(null, "Email format pogresan");
                     return;
@@ -71,8 +80,29 @@ public class mainGUI extends JFrame {
         frame.setVisible(true);
     }
 
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
+    private void initDeleteButton() {
+        deleteButton.addActionListener(new ActionListener() {
 
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // check for selected row first
+                if (table1.getSelectedRow() != -1) {
+                    // remove selected row from the model
+                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                    System.out.println(table1.getSelectedRow());
+                    model.removeRow(table1.getSelectedRow());
+                } else {
+                    JOptionPane.showMessageDialog(null, "You have to choose a key to delete");
+                }
+            }
+        });
+    }
+
+    private void initTable() {
+        TableModel dataModel = new DefaultTableModel(Utils.columnNames, 0);
+        table1 = new JTable(dataModel);
+        table1.setPreferredScrollableViewportSize(new Dimension(300, 100));
+        table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        scrollPane.setViewportView(table1);
     }
 }
