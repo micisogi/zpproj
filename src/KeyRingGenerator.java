@@ -16,7 +16,7 @@ import java.security.SignatureException;
 import java.util.Date;
 
 public class KeyRingGenerator {
-    private static void exportKeyPair(
+    public static void exportKeyPair(
             OutputStream secretOut,
             OutputStream publicOut,
             KeyPair keyPair,
