@@ -1,9 +1,13 @@
+import org.bouncycastle.openpgp.PGPException;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 public class mainGUI extends JFrame {
     private JPanel mainPanel;
@@ -30,6 +34,8 @@ public class mainGUI extends JFrame {
     private JTable table1;
     private JScrollPane scrollPane;
     private JButton deleteButton;
+    private JButton importButton;
+    private JButton exportButton;
 
     public mainGUI(String title) {
         super(title);
@@ -51,6 +57,38 @@ public class mainGUI extends JFrame {
 //        });
         initTable();
         initDeleteButton();
+        initGenerateButton();
+        initImportButton();
+
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setContentPane(mainPanel);
+        this.pack();
+    }
+
+    private void initImportButton() {
+       importButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                int result = fileChooser.showOpenDialog(mainPanel);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    try {
+                        KeyRingGenerator.readPublicKey(selectedFile.getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (PGPException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+    }
+
+    private void initGenerateButton() {
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
@@ -68,9 +106,6 @@ public class mainGUI extends JFrame {
                 }
             }
         });
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setContentPane(mainPanel);
-        this.pack();
     }
 
     public static void main(String[] args) throws Exception {

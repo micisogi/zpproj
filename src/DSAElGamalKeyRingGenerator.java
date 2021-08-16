@@ -5,11 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
 
-public class DSAKeyRingGenerator {
-   public  void generateDsaKeyPair(Integer keysize) throws Exception, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, PGPException {
+public class DSAElGamalKeyRingGenerator {
+   public  void generateDsaKeyPairWithParameters(Integer dsaKeySize, Integer elGamalKeySize,String name,String email) throws Exception, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, PGPException {
         Security.addProvider(new BouncyCastleProvider());
         KeyPairGenerator dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
-        dsaKpg.initialize(keysize);
+        dsaKpg.initialize(1024);
 
         KeyPair dsaKp = dsaKpg.generateKeyPair();
 
