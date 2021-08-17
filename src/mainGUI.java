@@ -1,6 +1,7 @@
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
+import utils.KeyRingHelper;
 import utils.Utils;
 
 import javax.swing.*;
@@ -51,7 +52,7 @@ public class mainGUI extends JFrame {
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
-    public mainGUI(String title) {
+    public mainGUI(String title) throws IOException {
         super(title);
 
         initDsaButtonGroup();
@@ -111,8 +112,6 @@ public class mainGUI extends JFrame {
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                Object testStrings[] = {"Name", "Email", "Valid From", "Key-ID"};
-                model.addRow(testStrings);
                 if (!email.getText().matches(Utils.EMAIL_PATTERN)) {
                     JOptionPane.showMessageDialog(null, "Email format pogresan");
                     return;
@@ -129,6 +128,7 @@ public class mainGUI extends JFrame {
                     System.out.println(passPhrase);
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
+                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
@@ -171,12 +171,20 @@ public class mainGUI extends JFrame {
         });
     }
 
-    private void initTable() {
-        TableModel dataModel = new DefaultTableModel(Utils.columnNames, 0);
+    private void initTable() throws IOException {
+        TableModel dataModel = new DefaultTableModel(Utils.columnNames,0){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         table1 = new JTable(dataModel);
         table1.setPreferredScrollableViewportSize(new Dimension(300, 100));
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         scrollPane.setViewportView(table1);
+        DefaultTableModel model = (DefaultTableModel) table1.getModel();
+        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
+
     }
 
     private void initSendButton() {

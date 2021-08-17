@@ -1,5 +1,12 @@
 package utils;
 
+import models.User;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
 public class Utils {
 
     public static final String EMAIL_PATTERN =
@@ -28,5 +35,20 @@ public class Utils {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(name).append(" <").append(email).append(">");
         return stringBuilder.toString();
+    }
+
+    public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
+        for (PGPPublicKey ppk : list
+        ) {
+            if(ppk.getUserIDs().hasNext()) {
+                User u = new User(ppk.getUserIDs().next());
+                Object o[] = new Object[4];
+                o[0] = u.getName();
+                o[1] =u.getEmail();
+                o[2]= "PLACEHOLDER";
+                o[3]="PLACEHOLDER";
+                model.addRow(o);
+            }
+        }
     }
 }
