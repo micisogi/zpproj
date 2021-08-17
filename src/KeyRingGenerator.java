@@ -50,6 +50,10 @@ public class KeyRingGenerator {
     static PGPPublicKey readPublicKey(InputStream input) throws IOException, PGPException {
         PGPPublicKeyRingCollection pgpPub = new PGPPublicKeyRingCollection(
                 PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
+        byte myEncoded[] = pgpPub.getEncoded();
+        try (FileOutputStream fos = new FileOutputStream("pbk")) {
+            fos.write(myEncoded);
+        }
 
         //
         // we just loop through the collection till we find a key suitable for encryption, in the real
@@ -69,5 +73,20 @@ public class KeyRingGenerator {
             }
         }
         throw new IllegalArgumentException("Can't find encryption key in key ring.");
+    }
+
+    static void insertKeyRing(PGPPublicKeyRing pgpPublicKeyRing, PGPPublicKeyRingCollection pgpPub) {
+        Iterator keyRingIter = pgpPub.getKeyRings();
+        while (keyRingIter.hasNext()) {
+            PGPPublicKeyRing keyRing = (PGPPublicKeyRing) keyRingIter.next();
+            System.out.println(keyRing.iterator().next().getUserIDs().next());
+            Iterator keyIter = keyRing.getPublicKeys();
+            while (keyIter.hasNext()) {
+                PGPPublicKey key = (PGPPublicKey) keyIter.next();
+                if (key.isEncryptionKey()) {
+                    System.out.println(Long.toHexString(key.getKeyID()));
+                }
+            }
+        }
     }
 }
