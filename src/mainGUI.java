@@ -7,6 +7,8 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,9 +44,10 @@ public class mainGUI extends JFrame {
 
     public mainGUI(String title) {
         super(title);
-
+      
         initDsaButtonGroup();
         initElGamalButtonGroup();
+
         initTable();
         initDeleteButton();
         initGenerateButton();
@@ -149,6 +152,7 @@ public class mainGUI extends JFrame {
     }
 
     private void initSendButton() {
+
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
 
