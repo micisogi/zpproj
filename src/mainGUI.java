@@ -1,3 +1,4 @@
+import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class mainGUI extends JFrame {
     private JPanel mainPanel;
@@ -28,7 +30,6 @@ public class mainGUI extends JFrame {
     private JCheckBox privacyCheckBox;
     private JCheckBox compressionCheckBox;
     private JTextArea message;
-    private JTextArea chipertext;
     private JRadioButton DESRadioButton;
     private JRadioButton IDEARadioButton;
     private JTable table1;
@@ -36,6 +37,8 @@ public class mainGUI extends JFrame {
     private JButton deleteButton;
     private JButton importButton;
     private JButton exportButton;
+    private JEditorPane chiphertext;
+    private JCheckBox conversionCheckBox;
 
     public mainGUI(String title) {
         super(title);
@@ -46,6 +49,8 @@ public class mainGUI extends JFrame {
         initDeleteButton();
         initGenerateButton();
         initImportButton();
+
+        initSendButton();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
@@ -141,5 +146,36 @@ public class mainGUI extends JFrame {
         table1.setPreferredScrollableViewportSize(new Dimension(300, 100));
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         scrollPane.setViewportView(table1);
+    }
+
+    private void initSendButton() {
+        sendButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+
+                if (!sendTo.getText().matches(Utils.EMAIL_PATTERN)) {
+                    JOptionPane.showMessageDialog(null, "Email format pogresan");
+                    return;
+                }
+                if (message.getText().isEmpty() || sendTo.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
+                }
+
+                PGPMessage pgpmsg = new PGPMessage(message.getText(),
+                        sendTo.getText(),
+                        authenticationCheckBox.isSelected(),
+                        privacyCheckBox.isSelected(),
+                        compressionCheckBox.isSelected(),
+                        conversionCheckBox.isSelected(),
+                        DESRadioButton.isSelected(),
+                        IDEARadioButton.isSelected());
+
+                try {
+                    chiphertext.setText(pgpmsg.compress(message.getText()).toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
     }
 }
