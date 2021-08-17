@@ -1,5 +1,7 @@
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
+import utils.Utils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,6 +13,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.util.Enumeration;
 import java.io.OutputStream;
 
 public class mainGUI extends JFrame {
@@ -41,10 +48,12 @@ public class mainGUI extends JFrame {
     private JButton exportButton;
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
+    private ButtonGroup dsaButtonGroup;
+    private ButtonGroup elGamalButtonGroup;
 
     public mainGUI(String title) {
         super(title);
-      
+
         initDsaButtonGroup();
         initElGamalButtonGroup();
 
@@ -61,7 +70,7 @@ public class mainGUI extends JFrame {
     }
 
     private void initElGamalButtonGroup() {
-        ButtonGroup elGamalButtonGroup = new ButtonGroup();
+        elGamalButtonGroup = new ButtonGroup();
         elGamalButtonGroup.add(elGamal1024);
         elGamalButtonGroup.add(elGamal2048);
         elGamalButtonGroup.add(elGamal4096);
@@ -69,7 +78,7 @@ public class mainGUI extends JFrame {
     }
 
     private void initDsaButtonGroup() {
-        ButtonGroup dsaButtonGroup = new ButtonGroup();
+        dsaButtonGroup = new ButtonGroup();
         dsaButtonGroup.add(DSA1024);
         dsaButtonGroup.add(DSA2048);
         DSA1024.setSelected(true);
@@ -102,7 +111,7 @@ public class mainGUI extends JFrame {
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                String testStrings[] = {"Name", "Email", "Valid From", "Key-ID"};
+                Object testStrings[] = {"Name", "Email", "Valid From", "Key-ID"};
                 model.addRow(testStrings);
                 if (!email.getText().matches(Utils.EMAIL_PATTERN)) {
                     JOptionPane.showMessageDialog(null, "Email format pogresan");
@@ -112,14 +121,33 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
                 } else {
                     System.out.println(Utils.getInstance().formatNameAndEmail(name.getText(), email.getText()));
-//                    JOptionPane.showMessageDialog(null, "Kljucevi su izgenerisani");
+                    DSAElGamalKeyRingGenerator dsael = new DSAElGamalKeyRingGenerator();
+                    System.out.println("DSA" + getSelectedButtonText(dsaButtonGroup));
+                    Integer dsaSize = Integer.parseInt(getSelectedButtonText(dsaButtonGroup));
+                    Integer elGamalSize = Integer.parseInt(getSelectedButtonText(elGamalButtonGroup));
+                    String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+                    System.out.println(passPhrase);
+                    try {
+                        dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
+                    } catch (NoSuchProviderException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    } catch (InvalidAlgorithmParameterException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (PGPException e) {
+                        e.printStackTrace();
+                    }
+                    JOptionPane.showMessageDialog(null, "Keys have been generated");
                 }
             }
         });
     }
 
     public static void main(String[] args) throws Exception {
-
+        Security.addProvider(new BouncyCastleProvider());
         JFrame frame = new mainGUI("ZP PROJEKAT UBI ME");
         frame.setSize(800, 500);
         frame.setVisible(true);
@@ -181,5 +209,17 @@ public class mainGUI extends JFrame {
 
             }
         });
+    }
+
+    public String getSelectedButtonText(ButtonGroup buttonGroup) {
+        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements(); ) {
+            AbstractButton button = buttons.nextElement();
+
+            if (button.isSelected()) {
+                return button.getText();
+            }
+        }
+
+        return null;
     }
 }
