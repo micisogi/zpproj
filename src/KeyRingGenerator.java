@@ -34,7 +34,6 @@ public class KeyRingGenerator {
 
         PGPKeyRingGenerator keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, pgpKeyPair,
                 identity, sha1Calc, null, null, new JcaPGPContentSignerBuilder(pgpKeyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1), new JcePBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256, sha1Calc).setProvider("BC").build(passPhrase));
-
         keyRingGen.generateSecretKeyRing().encode(secretOut);
         secretOut.close();
         keyRingGen.generatePublicKeyRing().encode(publicOut);
