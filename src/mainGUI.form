@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="mainGUI">
   <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="549" height="400"/>
+      <xy x="20" y="20" width="1214" height="466"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -12,7 +12,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="4b3d8" binding="Prvi" layout-manager="GridLayoutManager" row-count="8" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="4b3d8" binding="Prvi" layout-manager="GridLayoutManager" row-count="16" column-count="9" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="20" left="20" bottom="20" right="20"/>
             <constraints>
               <tabbedpane title="Prvi"/>
@@ -30,7 +30,7 @@
               </component>
               <vspacer id="a85a7">
                 <constraints>
-                  <grid row="5" column="1" row-span="3" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="1" row-span="8" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
               </vspacer>
               <component id="5b485" class="javax.swing.JLabel">
@@ -51,7 +51,7 @@
               </component>
               <component id="973b6" class="javax.swing.JTextField" binding="name">
                 <constraints>
-                  <grid row="1" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="1" column="2" row-span="1" col-span="7" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="50" height="-1"/>
                   </grid>
                 </constraints>
@@ -59,7 +59,7 @@
               </component>
               <component id="5cf84" class="javax.swing.JTextField" binding="email">
                 <constraints>
-                  <grid row="2" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="2" column="2" row-span="1" col-span="7" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="50" height="-1"/>
                   </grid>
                 </constraints>
@@ -75,18 +75,10 @@
               </component>
               <component id="1814a" class="javax.swing.JButton" binding="generateButton" default-binding="true">
                 <constraints>
-                  <grid row="5" column="2" row-span="3" col-span="2" vsize-policy="0" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="2" row-span="8" col-span="5" vsize-policy="0" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Generate"/>
-                </properties>
-              </component>
-              <component id="7b668" class="javax.swing.JRadioButton" binding="DSA2048">
-                <constraints>
-                  <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="2048"/>
                 </properties>
               </component>
               <component id="f9d64" class="javax.swing.JLabel">
@@ -95,6 +87,59 @@
                 </constraints>
                 <properties>
                   <text value="ElGamal:"/>
+                </properties>
+              </component>
+              <component id="14d6e" class="javax.swing.JRadioButton" binding="elGamal1024">
+                <constraints>
+                  <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="1024"/>
+                </properties>
+              </component>
+              <scrollpane id="d0f25" binding="scrollPane">
+                <constraints>
+                  <grid row="0" column="0" row-span="16" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="87fcf" class="javax.swing.JTable" binding="table1" default-binding="true">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </scrollpane>
+              <component id="f2119" class="javax.swing.JButton" binding="importButton">
+                <constraints>
+                  <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Import"/>
+                </properties>
+              </component>
+              <component id="20080" class="javax.swing.JButton" binding="exportButton">
+                <constraints>
+                  <grid row="6" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Export"/>
+                </properties>
+              </component>
+              <component id="5eb83" class="javax.swing.JButton" binding="deleteButton">
+                <constraints>
+                  <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Delete"/>
+                </properties>
+              </component>
+              <component id="7b668" class="javax.swing.JRadioButton" binding="DSA2048">
+                <constraints>
+                  <grid row="3" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="2048"/>
                 </properties>
               </component>
               <component id="bf223" class="javax.swing.JRadioButton" binding="elGamal4096">
@@ -115,54 +160,9 @@
                   <text value="2048"/>
                 </properties>
               </component>
-              <component id="14d6e" class="javax.swing.JRadioButton" binding="elGamal1024">
-                <constraints>
-                  <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="1024"/>
-                </properties>
-              </component>
-              <scrollpane id="d0f25" binding="scrollPane">
-                <constraints>
-                  <grid row="0" column="0" row-span="8" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties/>
-                <border type="none"/>
-                <children>
-                  <component id="87fcf" class="javax.swing.JTable" binding="table1" default-binding="true">
-                    <constraints/>
-                    <properties/>
-                  </component>
-                </children>
-              </scrollpane>
-              <component id="5eb83" class="javax.swing.JButton" binding="deleteButton">
-                <constraints>
-                  <grid row="5" column="4" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Delete"/>
-                </properties>
-              </component>
-              <component id="f2119" class="javax.swing.JButton" binding="importButton">
-                <constraints>
-                  <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="6" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Import"/>
-                </properties>
-              </component>
-              <component id="20080" class="javax.swing.JButton" binding="exportButton">
-                <constraints>
-                  <grid row="7" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Export"/>
-                </properties>
-              </component>
             </children>
           </grid>
-          <grid id="685f5" binding="Drugi" layout-manager="GridLayoutManager" row-count="7" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="685f5" binding="Drugi" layout-manager="GridLayoutManager" row-count="5" column-count="9" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="20" left="20" bottom="20" right="20"/>
             <constraints>
               <tabbedpane title="Drugi"/>
@@ -185,72 +185,8 @@
               </vspacer>
               <component id="62614" class="javax.swing.JTextField" binding="sendTo">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="0" column="1" row-span="1" col-span="6" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
-                  </grid>
-                </constraints>
-                <properties/>
-              </component>
-              <component id="74e6a" class="javax.swing.JButton" binding="sendButton" default-binding="true">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Send"/>
-                </properties>
-              </component>
-              <component id="e1b47" class="javax.swing.JCheckBox" binding="authenticationCheckBox" default-binding="true">
-                <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="authentication"/>
-                </properties>
-              </component>
-              <component id="c297e" class="javax.swing.JCheckBox" binding="privacyCheckBox" default-binding="true">
-                <constraints>
-                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="privacy"/>
-                </properties>
-              </component>
-              <component id="10ba" class="javax.swing.JCheckBox" binding="compressionCheckBox" default-binding="true">
-                <constraints>
-                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="compression"/>
-                </properties>
-              </component>
-              <component id="b943a" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Text:"/>
-                </properties>
-              </component>
-              <component id="40b96" class="javax.swing.JTextArea" binding="message">
-                <constraints>
-                  <grid row="4" column="1" row-span="1" col-span="4" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="150" height="50"/>
-                  </grid>
-                </constraints>
-                <properties/>
-              </component>
-              <component id="43ac7" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Chipertext:"/>
-                </properties>
-              </component>
-              <component id="e8948" class="javax.swing.JTextArea" binding="chipertext">
-                <constraints>
-                  <grid row="6" column="1" row-span="1" col-span="4" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="150" height="50"/>
                   </grid>
                 </constraints>
                 <properties/>
@@ -265,10 +201,94 @@
               </component>
               <component id="92ba5" class="javax.swing.JRadioButton" binding="IDEARadioButton" default-binding="true">
                 <constraints>
-                  <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="IDEA"/>
+                </properties>
+              </component>
+              <component id="b943a" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Text:"/>
+                </properties>
+              </component>
+              <component id="e1b47" class="javax.swing.JCheckBox" binding="authenticationCheckBox" default-binding="true">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="authentication"/>
+                </properties>
+              </component>
+              <component id="c297e" class="javax.swing.JCheckBox" binding="privacyCheckBox" default-binding="true">
+                <constraints>
+                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="privacy"/>
+                </properties>
+              </component>
+              <component id="10ba" class="javax.swing.JCheckBox" binding="compressionCheckBox" default-binding="true">
+                <constraints>
+                  <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="compression"/>
+                </properties>
+              </component>
+              <component id="cbdc0" class="javax.swing.JCheckBox" binding="conversionCheckBox" default-binding="true">
+                <constraints>
+                  <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="conversion"/>
+                </properties>
+              </component>
+              <scrollpane id="7bbe3">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="d7542" class="javax.swing.JTextArea" binding="message">
+                    <constraints/>
+                    <properties>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+              <component id="74e6a" class="javax.swing.JButton" binding="sendButton" default-binding="true">
+                <constraints>
+                  <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Send"/>
+                </properties>
+              </component>
+              <scrollpane id="4aabd">
+                <constraints>
+                  <grid row="4" column="8" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="1b9dc" class="javax.swing.JEditorPane" binding="chiphertext">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </scrollpane>
+              <component id="43ac7" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="8" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Chipertext:"/>
                 </properties>
               </component>
             </children>
@@ -277,4 +297,22 @@
       </tabbedpane>
     </children>
   </grid>
+  <buttonGroups>
+    <group name="desidea">
+      <member id="92ba5"/>
+      <member id="92ba5"/>
+      <member id="4d3ce"/>
+    </group>
+    <group name="dsaRadioButtons">
+      <member id="7b668"/>
+      <member id="7b668"/>
+      <member id="db9a7"/>
+    </group>
+    <group name="elGamalRadioButtons">
+      <member id="14d6e"/>
+      <member id="14d6e"/>
+      <member id="bf223"/>
+      <member id="98cdb"/>
+    </group>
+  </buttonGroups>
 </form>
