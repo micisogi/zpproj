@@ -44,25 +44,10 @@ public class mainGUI extends JFrame {
 
     public mainGUI(String title) {
         super(title);
-//
-//        ButtonGroup algorithmChoiceButtons = new ButtonGroup();
-//        algorithmChoiceButtons.add(DSA1024);
-//        algorithmChoiceButtons.add(elGamal4096);
+      
+        initDsaButtonGroup();
+        initElGamalButtonGroup();
 
-
-
-
-//        generateButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                DSAKeyRingGenerator dsa= new DSAKeyRingGenerator();
-//                try {
-//                    dsa.generateDsaKeyPair(1024);
-//                } catch (Exception exception) {
-//                    exception.printStackTrace();
-//                }
-//            }
-//        });
         initTable();
         initDeleteButton();
         initGenerateButton();
@@ -75,8 +60,23 @@ public class mainGUI extends JFrame {
         this.pack();
     }
 
+    private void initElGamalButtonGroup() {
+        ButtonGroup elGamalButtonGroup = new ButtonGroup();
+        elGamalButtonGroup.add(elGamal1024);
+        elGamalButtonGroup.add(elGamal2048);
+        elGamalButtonGroup.add(elGamal4096);
+        elGamal1024.setSelected(true);
+    }
+
+    private void initDsaButtonGroup() {
+        ButtonGroup dsaButtonGroup = new ButtonGroup();
+        dsaButtonGroup.add(DSA1024);
+        dsaButtonGroup.add(DSA2048);
+        DSA1024.setSelected(true);
+    }
+
     private void initImportButton() {
-       importButton.addActionListener(new ActionListener() {
+        importButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
