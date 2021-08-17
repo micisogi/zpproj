@@ -53,24 +53,26 @@ public class KeyRingHelper {
 
     public Iterator<PGPPublicKeyRing> savePublicKeyRing(PGPPublicKeyRing pgpPublicKeyRing) throws IOException, PGPException {
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
-
-            PGPPublicKeyRingCollection pgpPub = new PGPPublicKeyRingCollection(
+            PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
-            PGPPublicKeyRingCollection.addPublicKeyRing(pgpPub, pgpPublicKeyRing);
-            byte myEncoded[] = pgpPub.getEncoded();
+            pgpPubCollection = PGPPublicKeyRingCollection.addPublicKeyRing(pgpPubCollection, pgpPublicKeyRing);
+            byte myEncoded[] = pgpPubCollection.getEncoded();
             try (FileOutputStream fos = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
-                System.out.println("INSIDE TRY MY ENCODED"+myEncoded);
+                System.out.println("INSIDE TRY MY ENCODED " + myEncoded.length);
                 fos.write(myEncoded);
             }
-            try(FileInputStream fis= new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)){
+            try (FileInputStream fis = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
                 System.out.println("INSIDE SCOND TRY ");
                 int ch;
                 while ((ch = fis.read()) != -1) {
                     System.out.print((char) ch);
                 }
             }
-            return pgpPub.iterator();
+            return pgpPubCollection.iterator();
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
