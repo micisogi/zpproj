@@ -52,7 +52,6 @@ public class Utils {
     }
 
     public void pgpSecretKeyListToObject(List<PGPSecretKey> list, DefaultTableModel model) {
-//        System.out.println("Secret List"+list.size());
         model.getDataVector().removeAllElements();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
         User u = null;
@@ -77,21 +76,6 @@ public class Utils {
             o[4] = sk.getPublicKey().getAlgorithm() == 17? "DSA": "ElGamal";
             model.addRow(o);
         }
-//        for (PGPSecretKey sk : list) {
-//            if (sk.getUserIDs().hasNext()) {
-////                System.out.println("Secret List if"+list.size());
-//                User u = new User(sk.getUserIDs().next());
-//                Object o[] = new Object[columnNames.length];
-//                o[0] = u.getName();
-//                o[1] = u.getEmail();
-//                o[2] = sdf.format(sk.getPublicKey().getCreationTime());
-//                o[3] = Long.toHexString(sk.getPublicKey().getKeyID());
-//                o[4] = Long.toHexString(sk.getKeyID());
-//                o[5] = sk.getKeyEncryptionAlgorithm();
-//                model.addRow(o);
-//
-//            }
-//        }
     }
 
     public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
