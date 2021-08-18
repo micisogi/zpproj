@@ -48,7 +48,9 @@ public class DSAElGamalKeyRingGenerator {
                 new JcePBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256, sha1Calc).setProvider("BC").build(passPhrase.toCharArray()));
         keyRingGen.addSubKey(elgKeyPair);
         PGPPublicKeyRing pkr = keyRingGen.generatePublicKeyRing();
+        PGPSecretKeyRing skr = keyRingGen.generateSecretKeyRing();
         KeyRingHelper.getInstance().savePublicKeyRing(pkr);
+        KeyRingHelper.getInstance().saveSecretKeyRing(skr);
 
 
     }
