@@ -193,16 +193,14 @@ public class KeyRingHelper {
         }
     }
 
-   public PGPPublicKey readPublicKey(String fileName) throws IOException, PGPException
-    {
+    public PGPPublicKey readPublicKey(String fileName) throws IOException, PGPException {
         InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
         PGPPublicKey pubKey = readPublicKey(keyIn);
         keyIn.close();
         return pubKey;
     }
 
-   private PGPPublicKey readPublicKey(InputStream input) throws IOException, PGPException
-    {
+    private PGPPublicKey readPublicKey(InputStream input) throws IOException, PGPException {
         PGPPublicKeyRingCollection pgpPub = new PGPPublicKeyRingCollection(
                 PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
 
@@ -212,17 +210,15 @@ public class KeyRingHelper {
         //
 
         Iterator keyRingIter = pgpPub.getKeyRings();
-        while (keyRingIter.hasNext())
-        {
-            PGPPublicKeyRing keyRing = (PGPPublicKeyRing)keyRingIter.next();
+        while (keyRingIter.hasNext()) {
+            PGPPublicKeyRing keyRing = (PGPPublicKeyRing) keyRingIter.next();
 
             Iterator keyIter = keyRing.getPublicKeys();
-            while (keyIter.hasNext())
-            {
-                PGPPublicKey key = (PGPPublicKey)keyIter.next();
-
-                if (key.isEncryptionKey())
-                {
+            while (keyIter.hasNext()) {
+                PGPPublicKey key = (PGPPublicKey) keyIter.next();
+                System.out.println("READ INSIDE PUBLIC");
+                System.out.println("ALGORITHM: " + key.getAlgorithm() + "KEYID" + key.getKeyID());
+                if (key.isEncryptionKey()) {
                     return key;
                 }
             }
@@ -231,16 +227,14 @@ public class KeyRingHelper {
         throw new IllegalArgumentException("Can't find encryption key in key ring.");
     }
 
-  public  PGPSecretKey readSecretKey(String fileName) throws IOException, PGPException
-    {
+    public PGPSecretKey readSecretKey(String fileName) throws IOException, PGPException {
         InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
         PGPSecretKey secKey = readSecretKey(keyIn);
         keyIn.close();
         return secKey;
     }
 
-  private  PGPSecretKey readSecretKey(InputStream input) throws IOException, PGPException
-    {
+    private PGPSecretKey readSecretKey(InputStream input) throws IOException, PGPException {
         PGPSecretKeyRingCollection pgpSec = new PGPSecretKeyRingCollection(
                 PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
 
@@ -250,17 +244,15 @@ public class KeyRingHelper {
         //
 
         Iterator keyRingIter = pgpSec.getKeyRings();
-        while (keyRingIter.hasNext())
-        {
-            PGPSecretKeyRing keyRing = (PGPSecretKeyRing)keyRingIter.next();
+        while (keyRingIter.hasNext()) {
+            PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
 
             Iterator keyIter = keyRing.getSecretKeys();
-            while (keyIter.hasNext())
-            {
-                PGPSecretKey key = (PGPSecretKey)keyIter.next();
-
-                if (key.isSigningKey())
-                {
+            while (keyIter.hasNext()) {
+                PGPSecretKey key = (PGPSecretKey) keyIter.next();
+                System.out.println("READ INSIDE SECRET");
+                System.out.println("USERS: " + key.getUserIDs().next() + "KEYID" + key.getKeyID());
+                if (key.isSigningKey()) {
                     return key;
                 }
             }

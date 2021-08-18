@@ -94,10 +94,18 @@ public class mainGUI extends JFrame {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
-                        KeyRingGenerator.readPublicKey(new ByteArrayInputStream(selectedFile.getAbsolutePath().getBytes()));
+                        KeyRingHelper.getInstance().readPublicKey(selectedFile.getAbsolutePath());
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (PGPException e) {
+                        try {
+                            KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        } catch (PGPException pgpException) {
+                            pgpException.printStackTrace();
+                        }
                         e.printStackTrace();
                     }
                 }
@@ -161,9 +169,9 @@ public class mainGUI extends JFrame {
                 if (table1.getSelectedRow() != -1) {
                     // remove selected row from the model
                     DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                    int iDColumn= 3;
-                    int row= table1.getSelectedRow();
-                    String hexValue=table1.getModel().getValueAt(row,iDColumn).toString();
+                    int iDColumn = 3;
+                    int row = table1.getSelectedRow();
+                    String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
                     try {
                         KeyRingHelper.getInstance().deleteKeyRing(hexValue);
                         model.removeRow(table1.getSelectedRow());
@@ -184,7 +192,7 @@ public class mainGUI extends JFrame {
     }
 
     private void initTable() throws IOException {
-        TableModel dataModel = new DefaultTableModel(Utils.columnNames,0){
+        TableModel dataModel = new DefaultTableModel(Utils.columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
