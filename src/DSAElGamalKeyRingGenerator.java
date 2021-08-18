@@ -1,5 +1,6 @@
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
@@ -9,7 +10,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyPair;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 import utils.KeyRingHelper;
 import utils.Utils;
-
+import models.*;
 import javax.crypto.spec.DHParameterSpec;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

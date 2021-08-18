@@ -75,6 +75,9 @@ public class KeyRingHelper {
             PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
             pgpPubCollection = PGPPublicKeyRingCollection.addPublicKeyRing(pgpPubCollection, pgpPublicKeyRing);
+            for (PGPPublicKey pk: pgpPubCollection.iterator().next()){
+                System.out.println("ID: " + pk.getKeyID());
+            }
             byte myEncoded[] = pgpPubCollection.getEncoded();
             try (FileOutputStream fos = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
                 fos.write(myEncoded);
@@ -85,6 +88,36 @@ public class KeyRingHelper {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public List<PGPSecretKey> getSecretKeyRingsFromFile(){
+//        System.out.println("getSecretKeyRingsFromFile()");
+        ArrayList<PGPSecretKey> pgpSecretKeyList = new ArrayList<>();
+        try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
+            PGPSecretKeyRingCollection pgpSecCollection = new PGPSecretKeyRingCollection(
+                    PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator()
+            );
+//            System.out.println("collection size"+pgpSecCollection.size());
+            Iterator keyRingIter = pgpSecCollection.getKeyRings();
+            while (keyRingIter.hasNext()){
+                PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
+                Iterator keyIter = keyRing.getSecretKeys();
+                while (keyIter.hasNext()){
+                    PGPSecretKey key = (PGPSecretKey) keyIter.next();
+                    pgpSecretKeyList.add(key);
+//                    System.out.println(key.getKeyID());
+                }
+            }
+//            System.out.println(pgpSecretKeyList.size());
+            return pgpSecretKeyList;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (PGPException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public List<PGPPublicKey> getPublicKeyRingsFromFile() {

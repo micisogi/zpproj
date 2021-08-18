@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -49,6 +50,7 @@ public class mainGUI extends JFrame {
     private JButton exportButton;
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
+    private JTextField sendFrom;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
@@ -96,7 +98,7 @@ public class mainGUI extends JFrame {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
-                        KeyRingGenerator.readPublicKey(selectedFile.getAbsolutePath());
+                        KeyRingGenerator.readPublicKey(new ByteArrayInputStream(selectedFile.getAbsolutePath().getBytes()));
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (PGPException e) {
@@ -128,8 +130,8 @@ public class mainGUI extends JFrame {
                     System.out.println(passPhrase);
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
-
-                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
+                        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+//                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
@@ -184,8 +186,8 @@ public class mainGUI extends JFrame {
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         scrollPane.setViewportView(table1);
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
-        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
-
+//        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
+        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
     }
 
     private void initSendButton() {

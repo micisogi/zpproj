@@ -40,7 +40,7 @@ public class KeyRingGenerator {
         publicOut.close();
     }
 
-    static PGPPublicKey readPublicKey(String fileName) throws IOException, PGPException {
+    static PGPPublicKey F(String fileName) throws IOException, PGPException {
         InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
         PGPPublicKey pubKey = readPublicKey(keyIn);
         keyIn.close();
