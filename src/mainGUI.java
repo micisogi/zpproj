@@ -2,7 +2,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import utils.KeyRingHelper;
 import utils.Utils;
-
+import models.User;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -16,6 +16,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class mainGUI extends JFrame {
@@ -31,7 +32,6 @@ public class mainGUI extends JFrame {
     private JRadioButton DSA2048;
     private JRadioButton elGamal2048;
     private JRadioButton elGamal1024;
-    private JTextField sendTo;
     private JButton sendButton;
     private JCheckBox authenticationCheckBox;
     private JCheckBox privacyCheckBox;
@@ -46,7 +46,8 @@ public class mainGUI extends JFrame {
     private JButton exportButton;
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
-    private JTextField sendFrom;
+    private JComboBox from;
+    private JComboBox sendTo;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
@@ -114,6 +115,16 @@ public class mainGUI extends JFrame {
         });
     }
 
+    private void setDropDownList(JComboBox list){
+        ArrayList<String> emails = new ArrayList<>();
+        for (User u : Utils.getInstance().users){
+            emails.add(u.getNameAndEmail());
+        }
+//        System.out.println(emails.size());
+        list.setModel(new DefaultComboBoxModel<String>(emails.toArray(new String[0])));
+
+    }
+
     private void initGenerateButton() {
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -135,6 +146,9 @@ public class mainGUI extends JFrame {
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                       //CITAMO IZ DAT PRIVATNE KLJUCEVE
+                        System.out.println(Utils.getInstance().getUsers().size());
+
 //                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
@@ -205,6 +219,8 @@ public class mainGUI extends JFrame {
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
 //        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+        setDropDownList(from);
+        setDropDownList(sendTo);
     }
 
     private void initSendButton() {
@@ -212,16 +228,16 @@ public class mainGUI extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
 
-                if (!sendTo.getText().matches(Utils.EMAIL_PATTERN)) {
-                    JOptionPane.showMessageDialog(null, "Email format pogresan");
-                    return;
-                }
-                if (message.getText().isEmpty() || sendTo.getText().isEmpty()) {
+//                if (!sendTo.getSelectedItem()) {
+//                    JOptionPane.showMessageDialog(null, "Email format pogresan");
+//                    return;
+//                }
+                if (message.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
                 }
 
                 PGPMessage pgpmsg = new PGPMessage(message.getText(),
-                        sendTo.getText(),
+                        sendTo.getName(),
                         authenticationCheckBox.isSelected(),
                         privacyCheckBox.isSelected(),
                         compressionCheckBox.isSelected(),

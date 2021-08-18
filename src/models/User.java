@@ -1,24 +1,26 @@
 package models;
 
-import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPKeyRing;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKey;
 
 import java.util.Date;
 
 public class User {
-    private PGPPublicKeyRing publicKeyRing;
-    private PGPPrivateKey privateKeyRing;
     private String name;
     private String email;
     private PGPPublicKey dsaPubKey;
     private PGPSecretKey dsaSecretKey;
     private PGPPublicKey elgamalPubKey;
     private PGPSecretKey elgamalSecretKey;
+    private PGPKeyRing pubKeyRing;
+    private PGPKeyRing secKeyRing;
     private Date date;
+    private String nameAndEmail;
+    private String password;
 
     public User(String nameAndEmail) {
+        this.nameAndEmail = nameAndEmail;
         email = nameAndEmail.substring(nameAndEmail.indexOf("<") + 1);
         email = email.substring(0, email.indexOf(">"));
         name = nameAndEmail.substring(0, nameAndEmail.indexOf(" "));
@@ -68,23 +70,47 @@ public class User {
         return elgamalSecretKey;
     }
 
+    public String getNameAndEmail() {
+        return nameAndEmail;
+    }
+
+    public void setNameAndEmail(String nameAndEmail) {
+        this.nameAndEmail = nameAndEmail;
+    }
+
     public void setElgamalSecretKey(PGPSecretKey elgamalSecretKey) {
         this.elgamalSecretKey = elgamalSecretKey;
     }
 
-    public PGPPrivateKey getPrivateKeyRing() {
-        return privateKeyRing;
+    public PGPKeyRing getPubKeyRing() {
+        return pubKeyRing;
     }
 
-    public void setPrivateKeyRing(PGPPrivateKey privateKeyRing) {
-        this.privateKeyRing = privateKeyRing;
+    public void setPubKeyRing(PGPKeyRing pubKeyRing) {
+        this.pubKeyRing = pubKeyRing;
     }
 
-    public PGPPublicKeyRing getPublicKeyRing() {
-        return publicKeyRing;
+    public PGPKeyRing getSecKeyRing() {
+        return secKeyRing;
     }
 
-    public void setPublicKeyRing(PGPPublicKeyRing publicKeyRing) {
-        this.publicKeyRing = publicKeyRing;
+    public void setSecKeyRing(PGPKeyRing secKeyRing) {
+        this.secKeyRing = secKeyRing;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
