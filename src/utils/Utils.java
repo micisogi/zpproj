@@ -9,6 +9,7 @@ import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.swing.table.DefaultTableModel;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -59,13 +60,12 @@ public class Utils {
             PGPSecretKey sk = it.next();
             Object o[] = new Object[columnNames.length];
 
-            if(sk.getUserIDs().hasNext()) {
+            if (sk.getUserIDs().hasNext()) {
                 u = new User(sk.getUserIDs().next());
                 u.setDsaPubKey(sk.getPublicKey());
                 u.setDsaSecretKey(sk);
                 users.add(u);
-            }
-            else{
+            } else {
                 u.setElgamalPubKey(sk.getPublicKey());
                 u.setElgamalSecretKey(sk);
             }
@@ -73,7 +73,7 @@ public class Utils {
             o[1] = u.getEmail();
             o[2] = sdf.format(sk.getPublicKey().getCreationTime());
             o[3] = Long.toHexString(sk.getKeyID());
-            o[4] = sk.getPublicKey().getAlgorithm() == 17? "DSA": "ElGamal";
+            o[4] = sk.getPublicKey().getAlgorithm() == 17 ? "DSA" : "ElGamal";
             model.addRow(o);
         }
     }
@@ -83,16 +83,20 @@ public class Utils {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         for (PGPPublicKey ppk : list
         ) {
-            if(ppk.getUserIDs().hasNext()) {
+            if (ppk.getUserIDs().hasNext()) {
                 User u = new User(ppk.getUserIDs().next());
                 Object o[] = new Object[columnNames.length];
                 o[0] = u.getName();
-                o[1] =u.getEmail();
-                o[2]= sdf.format(ppk.getCreationTime());
-                o[3]= Long.toHexString(ppk.getKeyID());
+                o[1] = u.getEmail();
+                o[2] = sdf.format(ppk.getCreationTime());
+                o[3] = Long.toHexString(ppk.getKeyID());
                 o[4] = ppk.isMasterKey();
                 model.addRow(o);
             }
         }
+    }
+
+    public long hexStringToLongID(String hexString) {
+        return  new BigInteger(hexString, 16).longValue();
     }
 }

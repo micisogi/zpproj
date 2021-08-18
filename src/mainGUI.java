@@ -1,5 +1,4 @@
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import utils.KeyRingHelper;
 import utils.Utils;
@@ -10,8 +9,6 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +18,6 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.io.OutputStream;
 
 public class mainGUI extends JFrame {
     private JPanel mainPanel;
@@ -99,10 +95,18 @@ public class mainGUI extends JFrame {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
-                        KeyRingGenerator.readPublicKey(new ByteArrayInputStream(selectedFile.getAbsolutePath().getBytes()));
+                        KeyRingHelper.getInstance().readPublicKey(selectedFile.getAbsolutePath());
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (PGPException e) {
+                        try {
+                            KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        } catch (PGPException pgpException) {
+                            pgpException.printStackTrace();
+                        }
                         e.printStackTrace();
                     }
                 }
@@ -179,8 +183,21 @@ public class mainGUI extends JFrame {
                 if (table1.getSelectedRow() != -1) {
                     // remove selected row from the model
                     DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                    System.out.println(table1.getSelectedRow());
-                    model.removeRow(table1.getSelectedRow());
+                    int iDColumn = 3;
+                    int row = table1.getSelectedRow();
+                    String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
+                    try {
+                        KeyRingHelper.getInstance().deleteKeyRing(hexValue);
+                        model.removeRow(table1.getSelectedRow());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+
+                    }
+                    try {
+                        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "You have to choose a key to delete");
                 }
@@ -189,7 +206,7 @@ public class mainGUI extends JFrame {
     }
 
     private void initTable() throws IOException {
-        TableModel dataModel = new DefaultTableModel(Utils.columnNames,0){
+        TableModel dataModel = new DefaultTableModel(Utils.columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
