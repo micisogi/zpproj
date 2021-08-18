@@ -50,8 +50,6 @@ public class Utils {
         User u = null;
         for (Iterator<PGPSecretKey> it = list.iterator(); it.hasNext(); ) {
             PGPSecretKey sk = it.next();
-//            System.out.println("ID SECRET: " + sk.getKeyID());
-//            System.out.println("ID PUBLIC:" + sk.getPublicKey().getKeyID());
             Object o[] = new Object[columnNames.length];
 
             if(sk.getUserIDs().hasNext()) {
@@ -62,7 +60,7 @@ public class Utils {
             o[2] = sdf.format(sk.getPublicKey().getCreationTime());
             o[3] = Long.toHexString(sk.getPublicKey().getKeyID());
             o[4] = Long.toHexString(sk.getKeyID());
-            o[5] = sk.getPublicKey().getAlgorithm();
+            o[5] = sk.getPublicKey().getAlgorithm() == 17? "DSA": "ElGamal";
             model.addRow(o);
         }
 //        for (PGPSecretKey sk : list) {

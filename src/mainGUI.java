@@ -50,6 +50,7 @@ public class mainGUI extends JFrame {
     private JButton exportButton;
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
+    private JTextField sendFrom;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
