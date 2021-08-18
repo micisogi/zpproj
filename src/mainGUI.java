@@ -3,7 +3,7 @@ import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import utils.KeyRingHelper;
 import utils.Utils;
-
+import models.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -19,6 +19,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.io.OutputStream;
 
@@ -50,7 +51,7 @@ public class mainGUI extends JFrame {
     private JButton exportButton;
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
-    private JTextField sendFrom;
+    private JComboBox from;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
@@ -110,6 +111,14 @@ public class mainGUI extends JFrame {
         });
     }
 
+    private void setDropDownList(JComboBox from, ArrayList users){
+        ArrayList<String> emails = new ArrayList<>();
+//        for(User u: users){
+//
+//        }
+//        from = new JComboBox(users.);
+    }
+
     private void initGenerateButton() {
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -131,6 +140,7 @@ public class mainGUI extends JFrame {
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                        setDropDownList(from, Utils.getInstance().users);
 //                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();

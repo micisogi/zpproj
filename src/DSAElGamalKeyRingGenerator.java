@@ -50,6 +50,16 @@ public class DSAElGamalKeyRingGenerator {
         keyRingGen.addSubKey(elgKeyPair);
         PGPPublicKeyRing pkr = keyRingGen.generatePublicKeyRing();
         PGPSecretKeyRing skr = keyRingGen.generateSecretKeyRing();
+//        for(User u: Utils.getInstance().users){
+//            System.out.println(u.getEmail().equals(email));
+//            System.out.println(u.getEmail());
+//            System.out.println(email);
+//            if(u.getEmail().equals(email)){
+        User u = new User(Utils.getInstance().formatNameAndEmail(name, email));
+        u.setPassword(passPhrase);
+        u.setPubKeyRing(pkr);
+        u.setSecKeyRing(skr);
+
         KeyRingHelper.getInstance().savePublicKeyRing(pkr);
         KeyRingHelper.getInstance().saveSecretKeyRing(skr);
 
