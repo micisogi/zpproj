@@ -3,10 +3,7 @@ package utils;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +46,29 @@ public class KeyRingHelper {
         }
         return instance;
     }
+
+    public Iterator<PGPSecretKeyRing> saveSecretKeyRing(PGPSecretKeyRing pgpSecretKeyRing){
+        try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)){
+            PGPSecretKeyRingCollection pgpSecCollection = new PGPSecretKeyRingCollection(
+                    PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
+            pgpSecCollection = PGPSecretKeyRingCollection.addSecretKeyRing(pgpSecCollection, pgpSecretKeyRing);
+            byte myEncoded[] = pgpSecCollection.getEncoded();
+            try (FileOutputStream fos = new FileOutputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
+                fos.write(myEncoded);
+            }
+            return pgpSecCollection.iterator();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (PGPException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 
     public Iterator<PGPPublicKeyRing> savePublicKeyRing(PGPPublicKeyRing pgpPublicKeyRing) {
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
