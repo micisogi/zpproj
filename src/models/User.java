@@ -1,11 +1,15 @@
 package models;
 
+import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKey;
 
 import java.util.Date;
 
 public class User {
+    private PGPPublicKeyRing publicKeyRing;
+    private PGPPrivateKey privateKeyRing;
     private String name;
     private String email;
     private PGPPublicKey dsaPubKey;
@@ -66,5 +70,21 @@ public class User {
 
     public void setElgamalSecretKey(PGPSecretKey elgamalSecretKey) {
         this.elgamalSecretKey = elgamalSecretKey;
+    }
+
+    public PGPPrivateKey getPrivateKeyRing() {
+        return privateKeyRing;
+    }
+
+    public void setPrivateKeyRing(PGPPrivateKey privateKeyRing) {
+        this.privateKeyRing = privateKeyRing;
+    }
+
+    public PGPPublicKeyRing getPublicKeyRing() {
+        return publicKeyRing;
+    }
+
+    public void setPublicKeyRing(PGPPublicKeyRing publicKeyRing) {
+        this.publicKeyRing = publicKeyRing;
     }
 }
