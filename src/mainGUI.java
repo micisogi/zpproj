@@ -3,7 +3,7 @@ import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import utils.KeyRingHelper;
 import utils.Utils;
-import models.*;
+import models.User;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -36,7 +36,6 @@ public class mainGUI extends JFrame {
     private JRadioButton DSA2048;
     private JRadioButton elGamal2048;
     private JRadioButton elGamal1024;
-    private JTextField sendTo;
     private JButton sendButton;
     private JCheckBox authenticationCheckBox;
     private JCheckBox privacyCheckBox;
@@ -52,6 +51,7 @@ public class mainGUI extends JFrame {
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
     private JComboBox from;
+    private JComboBox sendTo;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
@@ -111,12 +111,14 @@ public class mainGUI extends JFrame {
         });
     }
 
-    private void setDropDownList(JComboBox from, ArrayList users){
+    private void setDropDownList(JComboBox list){
         ArrayList<String> emails = new ArrayList<>();
-//        for(User u: users){
-//
-//        }
-//        from = new JComboBox(users.);
+        for (User u : Utils.getInstance().users){
+            emails.add(u.getNameAndEmail());
+        }
+//        System.out.println(emails.size());
+        list.setModel(new DefaultComboBoxModel<String>(emails.toArray(new String[0])));
+
     }
 
     private void initGenerateButton() {
@@ -140,7 +142,9 @@ public class mainGUI extends JFrame {
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                        setDropDownList(from, Utils.getInstance().users);
+                       //CITAMO IZ DAT PRIVATNE KLJUCEVE
+                        System.out.println(Utils.getInstance().getUsers().size());
+
 //                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
@@ -198,6 +202,8 @@ public class mainGUI extends JFrame {
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
 //        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+        setDropDownList(from);
+        setDropDownList(sendTo);
     }
 
     private void initSendButton() {
@@ -205,16 +211,16 @@ public class mainGUI extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
 
-                if (!sendTo.getText().matches(Utils.EMAIL_PATTERN)) {
-                    JOptionPane.showMessageDialog(null, "Email format pogresan");
-                    return;
-                }
-                if (message.getText().isEmpty() || sendTo.getText().isEmpty()) {
+//                if (!sendTo.getSelectedItem()) {
+//                    JOptionPane.showMessageDialog(null, "Email format pogresan");
+//                    return;
+//                }
+                if (message.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
                 }
 
                 PGPMessage pgpmsg = new PGPMessage(message.getText(),
-                        sendTo.getText(),
+                        sendTo.getName(),
                         authenticationCheckBox.isSelected(),
                         privacyCheckBox.isSelected(),
                         compressionCheckBox.isSelected(),
