@@ -10,20 +10,24 @@ import org.bouncycastle.util.encoders.Hex;
 
 import javax.swing.table.DefaultTableModel;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class Utils {
 
+    public ArrayList<User> users;
+
     public static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
-    public static final String columnNames[] = {"Name", "Email", "Valid From", "Public Key-ID", "Private Key-ID", "Algorithm"};
+    public static final String columnNames[] = {"Name", "Email", "Valid From", "Key-ID", "Algorithm"};
 
     private static Utils instance;
 
     private Utils() {
+        users = new ArrayList<>();
     }
 
     public static Utils getInstance() {
@@ -54,13 +58,19 @@ public class Utils {
 
             if(sk.getUserIDs().hasNext()) {
                 u = new User(sk.getUserIDs().next());
+                u.setDsaPubKey(sk.getPublicKey());
+                u.setDsaSecretKey(sk);
+                users.add(u);
+            }
+            else{
+                u.setElgamalPubKey(sk.getPublicKey());
+                u.setElgamalSecretKey(sk);
             }
             o[0] = u.getName();
             o[1] = u.getEmail();
             o[2] = sdf.format(sk.getPublicKey().getCreationTime());
-            o[3] = Long.toHexString(sk.getPublicKey().getKeyID());
-            o[4] = Long.toHexString(sk.getKeyID());
-            o[5] = sk.getPublicKey().getAlgorithm() == 17? "DSA": "ElGamal";
+            o[3] = Long.toHexString(sk.getKeyID());
+            o[4] = sk.getPublicKey().getAlgorithm() == 17? "DSA": "ElGamal";
             model.addRow(o);
         }
 //        for (PGPSecretKey sk : list) {
