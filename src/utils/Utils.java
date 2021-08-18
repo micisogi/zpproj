@@ -30,6 +30,10 @@ public class Utils {
         users = new ArrayList<>();
     }
 
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+
     public static Utils getInstance() {
         if (instance == null) {
             synchronized (Utils.class) {
