@@ -51,7 +51,7 @@ public class Utils {
                 o[1] =u.getEmail();
                 o[2]= sdf.format(ppk.getCreationTime());
                 o[3]= Long.toHexString(ppk.getKeyID());
-                o[4] = "PLACEHOLDER";
+                o[4] = ppk.isMasterKey();
                 model.addRow(o);
             }
         }
