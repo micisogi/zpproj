@@ -54,6 +54,7 @@ public class Utils {
 
     public void pgpSecretKeyListToObject(List<PGPSecretKey> list, DefaultTableModel model) {
         model.getDataVector().removeAllElements();
+        users.removeAll(users);
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
         User u = null;
         for (Iterator<PGPSecretKey> it = list.iterator(); it.hasNext(); ) {
