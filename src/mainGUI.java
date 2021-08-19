@@ -201,7 +201,9 @@ public class mainGUI extends JFrame {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
                         //CITAMO IZ DAT PRIVATNE KLJUCEVE
-                        System.out.println(Utils.getInstance().getUsers().size());
+//                        setDropDownList(sendTo);
+//                        setDropDownList(from);
+//                        System.out.println(Utils.getInstance().getUsers().size());
 
 //                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
@@ -278,29 +280,45 @@ public class mainGUI extends JFrame {
     }
 
     private void initSendButton() {
-        String signas, encryptfor, msg;
+
         from.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(e.getSource()==from){
                     System.out.println(from.getSelectedItem());
                 }
-                else {
-                    JOptionPane.showMessageDialog(null, "Morate izabrati mejl za potpisivanje");
-                    return;
-                }
+//                else {
+//                    JOptionPane.showMessageDialog(null, "Morate izabrati mejl za potpisivanje");
+//                    return;
+//                }
             }
         });
+        sendTo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(sendTo.getSelectedItem());
+            }
+        });
+
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 if(!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
-                if(a.getSource()==from){
-                    System.out.println(from.getSelectedItem());
+                if(message.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
+                    return;
                 }
-//                System.out.println(sendTo.val);
+                if(from.getSelectedItem().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
+                    return;
+                }
+                if(sendTo.getSelectedItem().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
+                    return;
+                }
+
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
                         sendTo.getName(),
