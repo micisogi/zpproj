@@ -260,4 +260,33 @@ public class KeyRingHelper {
 
         throw new IllegalArgumentException("Can't find signing key in key ring.");
     }
+
+    public void exportPublicKeyRing(String keyRingIdHexa, String filePath) throws IOException, PGPException {
+        try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
+            PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
+                    PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
+
+            long keyId = Utils.getInstance().hexStringToLongID(keyRingIdHexa);
+            PGPPublicKeyRing keyRing = pgpPubCollection.getPublicKeyRing(keyId);
+
+            byte myEncoded[] = keyRing.getEncoded();
+            try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                fos.write(myEncoded);
+            }
+        }
+    }
+
+    public void exportSecretKeyRing(String keyRingIdHexa, String filePath) throws IOException, PGPException {
+        try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
+            PGPSecretKeyRingCollection pgpSecCollection = new PGPSecretKeyRingCollection(
+                    PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
+
+            long keyId = Utils.getInstance().hexStringToLongID(keyRingIdHexa);
+            PGPSecretKeyRing keyRing = pgpSecCollection.getSecretKeyRing(keyId);
+            byte myEncoded[] = keyRing.getEncoded();
+            try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                fos.write(myEncoded);
+            }
+        }
+    }
 }

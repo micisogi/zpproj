@@ -97,6 +97,11 @@ public class Utils {
     }
 
     public long hexStringToLongID(String hexString) {
-        return  new BigInteger(hexString, 16).longValue();
+        return new BigInteger(hexString, 16).longValue();
+    }
+
+    public static  String insertStringBeforeDot(String old, String toInsert) {
+        int at = old.lastIndexOf(".");
+        return old.substring(0, at) + toInsert + old.substring(at);
     }
 }
