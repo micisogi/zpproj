@@ -96,7 +96,9 @@ public class KeyRingHelper {
             long keyId = Utils.getInstance().hexStringToLongID(keyRingIdHexa);
             PGPPublicKeyRing keyRing = pgpPubCollection.getPublicKeyRing(keyId);
             System.out.println("BEFORE: " + pgpPubCollection.size());
-            pgpPubCollection = PGPPublicKeyRingCollection.removePublicKeyRing(pgpPubCollection, keyRing);
+            if (checkIfPublicKeyRingWithIdExists(keyId, pgpPubCollection)) {
+                pgpPubCollection = PGPPublicKeyRingCollection.removePublicKeyRing(pgpPubCollection, keyRing);
+            }
             removeSecretKey(keyId);
             System.out.println("AFTER: " + pgpPubCollection.size());
             if (pgpPubCollection.iterator().hasNext()) {
@@ -122,7 +124,9 @@ public class KeyRingHelper {
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
             PGPSecretKeyRing keyRing = pgpSecretKeyRingCollection.getSecretKeyRing(keyId);
             System.out.println("BEFORE: " + pgpSecretKeyRingCollection.size());
-            pgpSecretKeyRingCollection = PGPSecretKeyRingCollection.removeSecretKeyRing(pgpSecretKeyRingCollection, keyRing);
+            if (checkIfSecretKeyRingWithIdExists(keyId, pgpSecretKeyRingCollection)) {
+                pgpSecretKeyRingCollection = PGPSecretKeyRingCollection.removeSecretKeyRing(pgpSecretKeyRingCollection, keyRing);
+            }
             System.out.println("AFTER: " + pgpSecretKeyRingCollection.size());
             if (pgpSecretKeyRingCollection.iterator().hasNext()) {
                 for (PGPSecretKey pk : pgpSecretKeyRingCollection.iterator().next()) {
