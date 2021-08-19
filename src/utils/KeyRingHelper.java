@@ -208,16 +208,18 @@ public class KeyRingHelper {
         // we just loop through the collection till we find a key suitable for encryption, in the real
         // world you would probably want to be a bit smarter about this.
         //
-
+        savePublicKeyRingCollectionToFile(pgpPub);
         Iterator keyRingIter = pgpPub.getKeyRings();
+        System.out.println("collection size: " + pgpPub.size());
         while (keyRingIter.hasNext()) {
+            System.out.println("READ INSIDE PUBLIC");
             PGPPublicKeyRing keyRing = (PGPPublicKeyRing) keyRingIter.next();
+//            pgpPub = PGPPublicKeyRingCollection.addPublicKeyRing(pgpPub, keyRing);
+//            savePublicKeyRingCollectionToFile(pgpPub);
 
             Iterator keyIter = keyRing.getPublicKeys();
             while (keyIter.hasNext()) {
                 PGPPublicKey key = (PGPPublicKey) keyIter.next();
-                System.out.println("READ INSIDE PUBLIC");
-                System.out.println("ALGORITHM: " + key.getAlgorithm() + "KEYID" + key.getKeyID());
                 if (key.isEncryptionKey()) {
                     return key;
                 }
@@ -244,9 +246,10 @@ public class KeyRingHelper {
         //
 
         Iterator keyRingIter = pgpSec.getKeyRings();
+//        pgpSec = PGPSecretKeyRingCollection.addSecretKeyRing(pgpSec,keyRingIter.next());
+        saveSecretKeyRingCollectionToFile(pgpSec);
         while (keyRingIter.hasNext()) {
             PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
-
             Iterator keyIter = keyRing.getSecretKeys();
             while (keyIter.hasNext()) {
                 PGPSecretKey key = (PGPSecretKey) keyIter.next();
@@ -287,6 +290,23 @@ public class KeyRingHelper {
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 fos.write(myEncoded);
             }
+        }
+    }
+
+
+    private void savePublicKeyRingCollectionToFile(PGPPublicKeyRingCollection prc) throws IOException {
+        byte myEncoded[] = prc.getEncoded();
+        try (FileOutputStream fos = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
+            fos.write(myEncoded);
+            return;
+        }
+
+    }
+
+    private void saveSecretKeyRingCollectionToFile(PGPSecretKeyRingCollection src) throws IOException {
+        byte myEncoded[] = src.getEncoded();
+        try (FileOutputStream fos = new FileOutputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
+            fos.write(myEncoded);
         }
     }
 }

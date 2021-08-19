@@ -21,9 +21,17 @@ public class User {
 
     public User(String nameAndEmail) {
         this.nameAndEmail = nameAndEmail;
-        email = nameAndEmail.substring(nameAndEmail.indexOf("<") + 1);
-        email = email.substring(0, email.indexOf(">"));
-        name = nameAndEmail.substring(0, nameAndEmail.indexOf(" "));
+        if (containsEmail() && (nameAndEmail.indexOf("<") < nameAndEmail.indexOf(">"))) {
+            email = nameAndEmail.substring(nameAndEmail.indexOf("<") + 1);
+            email = email.substring(0, email.indexOf(">"));
+        } else {
+            email = " ";
+        }
+        if (containsEmail()) {
+            name = nameAndEmail.substring(0, nameAndEmail.indexOf("<") - 1);
+        } else {
+            name = nameAndEmail;
+        }
     }
 
     public Date getDate() {
@@ -112,5 +120,9 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    private boolean containsEmail() {
+        return nameAndEmail.contains("<") && nameAndEmail.contains(">");
     }
 }
