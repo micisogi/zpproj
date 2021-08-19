@@ -247,9 +247,9 @@ public class KeyRingHelper {
 
         Iterator keyRingIter = pgpSec.getKeyRings();
 //        pgpSec = PGPSecretKeyRingCollection.addSecretKeyRing(pgpSec,keyRingIter.next());
-        saveSecretKeyRingCollectionToFile(pgpSec);
         while (keyRingIter.hasNext()) {
             PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
+            saveSecretKeyRing(keyRing);
             Iterator keyIter = keyRing.getSecretKeys();
             while (keyIter.hasNext()) {
                 PGPSecretKey key = (PGPSecretKey) keyIter.next();
@@ -308,5 +308,19 @@ public class KeyRingHelper {
         try (FileOutputStream fos = new FileOutputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
             fos.write(myEncoded);
         }
+    }
+
+    private boolean checkIfPublicKeyRingWithIdExists(long keyRingId, PGPPublicKeyRingCollection pkrc) throws PGPException {
+        if (pkrc.getPublicKeyRing(keyRingId) == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkIfSecretKeyRingWithIdExists(long keyRingId, PGPSecretKeyRingCollection skrc) throws PGPException {
+        if (skrc.getSecretKeyRing(keyRingId) == null) {
+            return false;
+        }
+        return true;
     }
 }
