@@ -158,6 +158,12 @@ public class mainGUI extends JFrame {
                         e.printStackTrace();
                     }
                 }
+                try {
+                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                    Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
             }
         });
