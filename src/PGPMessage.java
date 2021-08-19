@@ -73,6 +73,12 @@ public class PGPMessage {
 
     }
 
+    public void sendMessage(){
+        if(authentication){
+
+        }
+    }
+
 //
 //
 //        try {

@@ -50,6 +50,7 @@ public class mainGUI extends JFrame {
     private JCheckBox conversionCheckBox;
     private JComboBox from;
     private JComboBox sendTo;
+    private JButton receive;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
@@ -161,6 +162,8 @@ public class mainGUI extends JFrame {
                 try {
                     DefaultTableModel model = (DefaultTableModel) table1.getModel();
                     Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                    setDropDownList(from);
+                    setDropDownList(sendTo);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -200,9 +203,8 @@ public class mainGUI extends JFrame {
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                        //CITAMO IZ DAT PRIVATNE KLJUCEVE
-//                        setDropDownList(sendTo);
-//                        setDropDownList(from);
+                        setDropDownList(sendTo);
+                        setDropDownList(from);
 //                        System.out.println(Utils.getInstance().getUsers().size());
 
 //                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
@@ -251,6 +253,8 @@ public class mainGUI extends JFrame {
                     }
                     try {
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                        setDropDownList(sendTo);
+                        setDropDownList(from);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -310,14 +314,17 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
                     return;
                 }
-                if(from.getSelectedItem().equals("")) {
+                if(from.getSelectedItem()==null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
-                if(sendTo.getSelectedItem().equals("")) {
+                if(sendTo.getSelectedItem()==null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
+
+                String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+
 
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
@@ -330,11 +337,11 @@ public class mainGUI extends JFrame {
                         IDEARadioButton.isSelected());
 
                 try {
+                    pgpmsg.sendMessage();
                     chiphertext.setText(pgpmsg.compress(message.getText()).toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         });
     }
@@ -349,5 +356,9 @@ public class mainGUI extends JFrame {
         }
 
         return null;
+    }
+
+    void getInfoFromUser(String email){
+
     }
 }
