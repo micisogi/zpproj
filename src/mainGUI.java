@@ -50,6 +50,7 @@ public class mainGUI extends JFrame {
     private JCheckBox conversionCheckBox;
     private JComboBox from;
     private JComboBox sendTo;
+    private JButton receive;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
 
@@ -321,6 +322,10 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
+
+                String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+
+
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
                         sendTo.getName(),
@@ -351,5 +356,9 @@ public class mainGUI extends JFrame {
         }
 
         return null;
+    }
+
+    void getInfoFromUser(String email){
+
     }
 }

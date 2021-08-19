@@ -105,4 +105,36 @@ public class Utils {
         int at = old.lastIndexOf(".");
         return old.substring(0, at) + toInsert + old.substring(at);
     }
+
+    public void getDSAPublicKeyFromFile(List<PGPPublicKey> list, String userID){}
+
+    public void getDSASecretKeyFromFile(List<PGPSecretKey> list, String userID){}
+
+    public void getElGamPublicKeyFromFile(List<PGPPublicKey> list, String userID){}
+
+    public void getElGamSecretKeyFromFile(List<PGPSecretKey> list, String userID){}
+
+    public String getPasswordFromFile(List<PGPSecretKey> list, String userID) {
+        for (Iterator<PGPSecretKey> it = list.iterator(); it.hasNext(); ) {
+            PGPSecretKey sk = it.next();
+            Object o[] = new Object[columnNames.length];
+
+//            if (sk.getUserIDs().hasNext()) {
+//                u = new User(sk.getUserIDs().next());
+//                u.setDsaPubKey(sk.getPublicKey());
+//                u.setDsaSecretKey(sk);
+//                users.add(u);
+//            } else {
+//                u.setElgamalPubKey(sk.getPublicKey());
+//                u.setElgamalSecretKey(sk);
+//            }
+//            o[0] = u.getName();
+//            o[1] = u.getEmail();
+//            o[2] = sdf.format(sk.getPublicKey().getCreationTime());
+//            o[3] = Long.toHexString(sk.getKeyID());
+//            o[4] = sk.getPublicKey().getAlgorithm() == 17 ? "DSA" : "ElGamal";
+
+        }
+        return null;
+    }
 }
