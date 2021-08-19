@@ -272,19 +272,31 @@ public class mainGUI extends JFrame {
     }
 
     private void initSendButton() {
-
-        sendButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-
-//                if (!sendTo.getSelectedItem()) {
-//                    JOptionPane.showMessageDialog(null, "Email format pogresan");
-//                    return;
-//                }
-                if (message.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
+        String signas, encryptfor, msg;
+        from.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(e.getSource()==from){
+                    System.out.println(from.getSelectedItem());
                 }
-
-                PGPMessage pgpmsg = new PGPMessage(message.getText(),
+                else {
+                    JOptionPane.showMessageDialog(null, "Morate izabrati mejl za potpisivanje");
+                    return;
+                }
+            }
+        });
+        sendButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent a) {
+                if(!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
+                    JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
+                    return;
+                }
+                if(a.getSource()==from){
+                    System.out.println(from.getSelectedItem());
+                }
+//                System.out.println(sendTo.val);
+                PGPMessage pgpmsg = new PGPMessage(
+                        message.getText(),
                         sendTo.getName(),
                         authenticationCheckBox.isSelected(),
                         privacyCheckBox.isSelected(),
