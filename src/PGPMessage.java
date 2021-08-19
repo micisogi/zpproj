@@ -57,6 +57,22 @@ public class PGPMessage {
         return bos.toByteArray();
     }
 
+    public void authentication(String from, String sendTo, String alg){
+
+    }
+
+    public void privacy(String from, String sendTo, String alg){
+
+    }
+
+    public void compression(){
+
+    }
+
+    public void conversion(){
+
+    }
+
 //
 //
 //        try {
