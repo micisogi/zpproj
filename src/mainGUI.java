@@ -3,7 +3,9 @@ import org.bouncycastle.openpgp.PGPException;
 import utils.KeyRingHelper;
 import utils.Utils;
 import models.User;
+
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
@@ -61,12 +63,58 @@ public class mainGUI extends JFrame {
         initDeleteButton();
         initGenerateButton();
         initImportButton();
-
+        initExportButton();
         initSendButton();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+    }
+
+    private void initExportButton() {
+        exportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (table1.getSelectedRow() != -1) {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                    fileChooser.setFileFilter(new FileNameExtensionFilter("*.asc", "asc"));
+                    int result = fileChooser.showOpenDialog(mainPanel);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        File selectedFile = fileChooser.getSelectedFile();
+                        String absolutePath = selectedFile.getAbsolutePath();
+                        if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("asc"))
+                            absolutePath += ".asc";
+
+                        try {
+
+                            DefaultTableModel model = (DefaultTableModel) table1.getModel();
+                            int iDColumn = 3;
+                            int row = table1.getSelectedRow();
+                            String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
+                            KeyRingHelper.getInstance().exportPublicKeyRing(hexValue, Utils.insertStringBeforeDot(absolutePath, "_pub"));
+                            KeyRingHelper.getInstance().exportSecretKeyRing(hexValue, Utils.insertStringBeforeDot(absolutePath, "_sec"));
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (PGPException e) {
+                            try {
+                                KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
+                            } catch (IOException ioException) {
+                                ioException.printStackTrace();
+                            } catch (PGPException pgpException) {
+                                pgpException.printStackTrace();
+                            }
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "You have to choose a key to export");
+                }
+            }
+        });
+
     }
 
     private void initElGamalButtonGroup() {
@@ -115,9 +163,9 @@ public class mainGUI extends JFrame {
         });
     }
 
-    private void setDropDownList(JComboBox list){
+    private void setDropDownList(JComboBox list) {
         ArrayList<String> emails = new ArrayList<>();
-        for (User u : Utils.getInstance().users){
+        for (User u : Utils.getInstance().users) {
             emails.add(u.getNameAndEmail());
         }
 //        System.out.println(emails.size());
@@ -146,7 +194,7 @@ public class mainGUI extends JFrame {
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                       //CITAMO IZ DAT PRIVATNE KLJUCEVE
+                        //CITAMO IZ DAT PRIVATNE KLJUCEVE
                         System.out.println(Utils.getInstance().getUsers().size());
 
 //                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
