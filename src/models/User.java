@@ -3,6 +3,7 @@ package models;
 import org.bouncycastle.openpgp.PGPKeyRing;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
+import utils.Utils;
 
 import java.util.Date;
 
@@ -124,5 +125,12 @@ public class User {
 
     private boolean containsEmail() {
         return nameAndEmail.contains("<") && nameAndEmail.contains(">");
+    }
+
+    public static User getInfoFromUser(String email){
+        for (User u : Utils.getInstance().users){
+            if(u.getNameAndEmail().equals(email)) return u;
+        }
+        return null;
     }
 }

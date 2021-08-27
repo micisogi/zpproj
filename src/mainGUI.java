@@ -328,13 +328,19 @@ public class mainGUI extends JFrame {
 
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
-                        sendTo.getName(),
+                        from.getSelectedItem().toString(),
+                        sendTo.getSelectedItem().toString(),
                         authenticationCheckBox.isSelected(),
                         privacyCheckBox.isSelected(),
                         compressionCheckBox.isSelected(),
                         conversionCheckBox.isSelected(),
                         DESRadioButton.isSelected(),
-                        IDEARadioButton.isSelected());
+                        IDEARadioButton.isSelected(),
+                        passPhrase);
+
+
+//                Utils.getInstance().
+//                System.out.println("User from "+ u.getName()+ "Pubkey"+ u.getDsaPubKey().);
 
                 try {
                     pgpmsg.sendMessage();
@@ -358,7 +364,5 @@ public class mainGUI extends JFrame {
         return null;
     }
 
-    void getInfoFromUser(String email){
 
-    }
 }
