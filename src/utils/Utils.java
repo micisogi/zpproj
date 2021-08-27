@@ -3,6 +3,7 @@ package utils;
 import models.User;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKey;
@@ -114,27 +115,4 @@ public class Utils {
 
     public void getElGamSecretKeyFromFile(List<PGPSecretKey> list, String userID){}
 
-    public String getPasswordFromFile(List<PGPSecretKey> list, String userID) {
-        for (Iterator<PGPSecretKey> it = list.iterator(); it.hasNext(); ) {
-            PGPSecretKey sk = it.next();
-            Object o[] = new Object[columnNames.length];
-
-//            if (sk.getUserIDs().hasNext()) {
-//                u = new User(sk.getUserIDs().next());
-//                u.setDsaPubKey(sk.getPublicKey());
-//                u.setDsaSecretKey(sk);
-//                users.add(u);
-//            } else {
-//                u.setElgamalPubKey(sk.getPublicKey());
-//                u.setElgamalSecretKey(sk);
-//            }
-//            o[0] = u.getName();
-//            o[1] = u.getEmail();
-//            o[2] = sdf.format(sk.getPublicKey().getCreationTime());
-//            o[3] = Long.toHexString(sk.getKeyID());
-//            o[4] = sk.getPublicKey().getAlgorithm() == 17 ? "DSA" : "ElGamal";
-
-        }
-        return null;
-    }
 }

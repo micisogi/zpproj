@@ -1,3 +1,4 @@
+import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
@@ -13,27 +14,42 @@ import java.util.Date;
 
 public class PGPMessage {
     private String message;
-    private String email;
+    String from;
+    String sendTo;
     private boolean authentication, privacy, compression, conversion, des, idea;
     private String chipertext;
+    User userfrom;
+    User userSendTo;
+    String passPhrase;
 
     public PGPMessage(String message,
-                      String email,
+                      String from,
+                      String sendTo,
                       boolean authentication,
                       boolean privacy,
                       boolean compression,
                       boolean conversion,
                       boolean des,
-                      boolean idea)
+                      boolean idea,
+                      String passPhrase)
     {
         this.message = message;
-        this.email = email;
+        this.from = from;
+        this.sendTo = sendTo;
         this.authentication = authentication;
         this.privacy = privacy;
         this.compression = compression;
         this.conversion = conversion;
         this.des = des;
         this.idea = idea;
+        this.passPhrase = passPhrase;
+
+        userfrom = User.getInfoFromUser(from.toString());
+        userSendTo = User.getInfoFromUser(sendTo.toString());
+    }
+
+    public void getSecretKey(){
+
     }
 
     public String getChipertext() {
