@@ -10,6 +10,7 @@ import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.swing.table.DefaultTableModel;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class Utils {
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
-    public static final String columnNames[] = {"Name", "Email", "Valid From", "Key-ID", "Algorithm"};
+    public static final String columnNames[] = {"Name", "Email", "Valid From", "Key-ID", "Algorithm", "Type"};
 
     private static Utils instance;
 
@@ -53,7 +54,19 @@ public class Utils {
         return stringBuilder.toString();
     }
 
+    public static void refreshTable(DefaultTableModel model) {
+        try {
+            Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+            Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
     public void pgpSecretKeyListToObject(List<PGPSecretKey> list, DefaultTableModel model) {
+        System.out.println("PRIVATE LIST SIZE : " + list.size());
         model.getDataVector().removeAllElements();
         users.removeAll(users);
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
@@ -68,6 +81,7 @@ public class Utils {
                 u.setDsaSecretKey(sk);
                 users.add(u);
             } else {
+                System.out.println("SETTING PUBLIC KEY");
                 u.setElgamalPubKey(sk.getPublicKey());
                 u.setElgamalSecretKey(sk);
             }
@@ -76,25 +90,51 @@ public class Utils {
             o[2] = sdf.format(sk.getPublicKey().getCreationTime());
             o[3] = Long.toHexString(sk.getKeyID());
             o[4] = sk.getPublicKey().getAlgorithm() == 17 ? "DSA" : "ElGamal";
+            o[5] = "PRIVATE";
+            System.out.println("ADDING PRIVATE");
             model.addRow(o);
         }
     }
 
     public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
-        model.getDataVector().removeAllElements();
+        System.out.println("PUBLIC LIST SIZE: " + list.size());
         SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         for (PGPPublicKey ppk : list
         ) {
             if (ppk.getUserIDs().hasNext()) {
                 User u = new User(ppk.getUserIDs().next());
+                users.add(u);
                 Object o[] = new Object[columnNames.length];
                 o[0] = u.getName();
                 o[1] = u.getEmail();
                 o[2] = sdf.format(ppk.getCreationTime());
                 o[3] = Long.toHexString(ppk.getKeyID());
-                o[4] = ppk.isMasterKey();
+                o[4] = ppk.getAlgorithm() == 17 ? "DSA" : "ElGamal";
+                o[5] = "PUBLIC";
+                System.out.println("ADDING PUBLIC");
+                model.addRow(o);
+            } else {
+                User u = new User("");
+                for (User k : users) {
+                    if(k.getElgamalPubKey()!=null){
+                        if (k.getElgamalPubKey().getKeyID() == ppk.getKeyID()) {
+                            u = k;
+                            break;
+                        }
+                    }
+
+                }
+                Object o[] = new Object[columnNames.length];
+                o[0] = u.getName();
+                o[1] = u.getEmail();
+                o[2] = sdf.format(ppk.getCreationTime());
+                o[3] = Long.toHexString(ppk.getKeyID());
+                o[4] = ppk.getAlgorithm() == 17 ? "DSA" : "ElGamal";
+                o[5] = "PUBLIC";
+                System.out.println("ADDING PUBLIC");
                 model.addRow(o);
             }
+
         }
     }
 
@@ -102,12 +142,12 @@ public class Utils {
         return new BigInteger(hexString, 16).longValue();
     }
 
-    public static  String insertStringBeforeDot(String old, String toInsert) {
+    public static String insertStringBeforeDot(String old, String toInsert) {
         int at = old.lastIndexOf(".");
         return old.substring(0, at) + toInsert + old.substring(at);
     }
 
-    public void readPublicKeysFromFile(){
+    public void readPublicKeysFromFile() {
 
     }
 

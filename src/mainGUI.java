@@ -11,9 +11,7 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -66,10 +64,34 @@ public class mainGUI extends JFrame {
         initImportButton();
         initExportButton();
         initSendButton();
+        initReceiveButton();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+    }
+
+    private void initReceiveButton() {
+        receive.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                int result = fileChooser.showOpenDialog(mainPanel);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    String absolutePath = selectedFile.getAbsolutePath();
+                    try {
+                        FileInputStream fis = new FileInputStream(absolutePath);
+                        PGPMessage.verifyFile(fis);
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        fileNotFoundException.printStackTrace();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     private void initExportButton() {
@@ -140,17 +162,20 @@ public class mainGUI extends JFrame {
             public void actionPerformed(ActionEvent arg0) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 int result = fileChooser.showOpenDialog(mainPanel);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
                         KeyRingHelper.getInstance().readPublicKey(selectedFile.getAbsolutePath());
+                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (PGPException e) {
                         try {
                             KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
+                            Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         } catch (PGPException pgpException) {
@@ -159,14 +184,9 @@ public class mainGUI extends JFrame {
                         e.printStackTrace();
                     }
                 }
-                try {
-                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
-                    Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                    setDropDownList(from);
-                    setDropDownList(sendTo);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
+                setDropDownList(from);
+                setDropDownList(sendTo);
 
             }
         });
@@ -207,7 +227,7 @@ public class mainGUI extends JFrame {
                         setDropDownList(from);
 //                        System.out.println(Utils.getInstance().getUsers().size());
 
-//                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
+                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
@@ -277,8 +297,7 @@ public class mainGUI extends JFrame {
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         scrollPane.setViewportView(table1);
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
-//        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
-        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+        Utils.refreshTable(model);
         setDropDownList(from);
         setDropDownList(sendTo);
     }
@@ -288,7 +307,7 @@ public class mainGUI extends JFrame {
         from.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(e.getSource()==from){
+                if (e.getSource() == from) {
                     System.out.println(from.getSelectedItem());
                 }
             }
@@ -302,19 +321,19 @@ public class mainGUI extends JFrame {
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
-                if(!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
+                if (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
-                if(message.getText().isEmpty()) {
+                if (message.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
                     return;
                 }
-                if(from.getSelectedItem()==null) {
+                if (from.getSelectedItem() == null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
-                if(sendTo.getSelectedItem()==null) {
+                if (sendTo.getSelectedItem() == null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
@@ -333,7 +352,7 @@ public class mainGUI extends JFrame {
                         IDEARadioButton.isSelected(),
                         passPhrase);
 
-                if(!pgpmsg.verifyPassPhrase()) {
+                if (!pgpmsg.verifyPassPhrase()) {
                     JOptionPane.showMessageDialog(null, "Pogresna lozinka");
                     return;
                 }

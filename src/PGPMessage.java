@@ -1,10 +1,12 @@
 import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import utils.KeyRingHelper;
 import utils.Utils;
 
@@ -142,4 +144,51 @@ public class PGPMessage {
 //        }
 //
 //    }
+
+    public static void verifyFile(
+            InputStream        in)
+            throws Exception
+    {
+        in = PGPUtil.getDecoderStream(in);
+
+        JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(in);
+
+        PGPCompressedData           c1 = (PGPCompressedData)pgpFact.nextObject();
+
+        pgpFact = new JcaPGPObjectFactory(c1.getDataStream());
+
+        PGPOnePassSignatureList     p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
+
+        PGPOnePassSignature         ops = p1.get(0);
+
+        PGPLiteralData              p2 = (PGPLiteralData)pgpFact.nextObject();
+
+        InputStream                 dIn = p2.getInputStream();
+        int                         ch;
+        KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+
+        PGPPublicKey                key =    KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+        FileOutputStream            out = new FileOutputStream(p2.getFileName());
+
+        ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
+
+        while ((ch = dIn.read()) >= 0)
+        {
+            ops.update((byte)ch);
+            out.write(ch);
+        }
+
+        out.close();
+
+        PGPSignatureList            p3 = (PGPSignatureList)pgpFact.nextObject();
+
+        if (ops.verify(p3.get(0)))
+        {
+            System.out.println("signature verified.");
+        }
+        else
+        {
+            System.out.println("signature verification failed.");
+        }
+    }
 }
