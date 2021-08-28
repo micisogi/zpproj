@@ -291,10 +291,6 @@ public class mainGUI extends JFrame {
                 if(e.getSource()==from){
                     System.out.println(from.getSelectedItem());
                 }
-//                else {
-//                    JOptionPane.showMessageDialog(null, "Morate izabrati mejl za potpisivanje");
-//                    return;
-//                }
             }
         });
         sendTo.addActionListener(new ActionListener() {
@@ -325,7 +321,6 @@ public class mainGUI extends JFrame {
 
                 String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
 
-
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
                         from.getSelectedItem().toString(),
@@ -338,6 +333,10 @@ public class mainGUI extends JFrame {
                         IDEARadioButton.isSelected(),
                         passPhrase);
 
+                if(!pgpmsg.verifyPassPhrase()) {
+                    JOptionPane.showMessageDialog(null, "Pogresna lozinka");
+                    return;
+                }
 
 //                Utils.getInstance().
 //                System.out.println("User from "+ u.getName()+ "Pubkey"+ u.getDsaPubKey().);

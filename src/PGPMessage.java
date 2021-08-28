@@ -1,16 +1,18 @@
 import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
+import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
+import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import utils.KeyRingHelper;
+import utils.Utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.Buffer;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 public class PGPMessage {
     private String message;
@@ -46,10 +48,22 @@ public class PGPMessage {
 
         userfrom = User.getInfoFromUser(from.toString());
         userSendTo = User.getInfoFromUser(sendTo.toString());
+
     }
 
-    public void getSecretKey(){
+    public PGPPrivateKey getPrivateKey(){
+        try {
+            return KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+        } catch (IOException | PGPException e) {
+//            e.printStackTrace();
+            return null;
+        }
+    }
 
+    public boolean verifyPassPhrase(){
+        PGPPrivateKey pk = getPrivateKey();
+        if(pk == null) return false;
+        else return true;
     }
 
     public String getChipertext() {
