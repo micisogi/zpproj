@@ -3,7 +3,6 @@ import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.*;
-import org.bouncycastle.util.io.pem.PemObjectParser;
 
 import java.io.*;
 import java.security.InvalidKeyException;

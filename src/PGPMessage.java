@@ -1,10 +1,13 @@
 import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import utils.KeyRingHelper;
 import utils.Utils;
 
@@ -23,6 +26,7 @@ public class PGPMessage {
     User userfrom;
     User userSendTo;
     String passPhrase;
+    PGPPrivateKey privateKey;
 
     public PGPMessage(String message,
                       String from,
@@ -53,7 +57,7 @@ public class PGPMessage {
 
     public PGPPrivateKey getPrivateKey(){
         try {
-            return KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+            return privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
         } catch (IOException | PGPException e) {
 //            e.printStackTrace();
             return null;
@@ -106,12 +110,97 @@ public class PGPMessage {
 
     }
 
-    public void sendMessage(){
+    public void sendMessage() throws IOException, PGPException {
         if(authentication){
+            PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
+//            PGPPrivateKey privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+//            PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
+//            signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
+//
+//            byte[] messageCharToArray = message.getBytes();
+//            ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+//            OutputStream out = encOut;
+//            out = new ArmoredOutputStream(out);
+//
+//            Iterator    it = secretKey.getPublicKey().getUserIDs();
+//            if (it.hasNext())
+//            {
+//                PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
+//
+//                spGen.setSignerUserID(false, (String)it.next());
+//                signatureGenerator.setHashedSubpackets(spGen.generate());
+//            }
+//
+//            signatureGenerator.update(messageCharToArray);
+//
+//            PGPSignature sig =  signatureGenerator.generate();
 
+            String messageSignature = signMessageByteArray(message, secretKey,from,passPhrase);
+
+
+
+
+
+            chipertext = String.valueOf(privateKey.getKeyID()) + message + messageSignature.toString();
         }
     }
 
+    private static String signMessageByteArray(String message,
+                                               PGPSecretKey secretKey,String from, String passPhrase) throws IOException,PGPException{
+
+        byte[] messageCharArray = message.getBytes();
+
+        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+        OutputStream out = encOut;
+        out = new ArmoredOutputStream(out);
+
+        // Unlock the private key using the password
+
+        PGPPrivateKey privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+
+        // Signature generator, we can generate the public key from the private
+        // key! Nifty!
+        PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
+        signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
+
+        Iterator it = secretKey.getPublicKey().getUserIDs();
+        if (it.hasNext()) {
+            PGPSignatureSubpacketGenerator spGen = new PGPSignatureSubpacketGenerator();
+            spGen.setSignerUserID(false, (String) it.next());
+            signatureGenerator.setHashedSubpackets(spGen.generate());
+        }
+
+        PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
+                PGPCompressedData.ZLIB);
+
+        BCPGOutputStream bOut = new BCPGOutputStream(comData.open(out));
+
+        signatureGenerator.generateOnePassVersion(false).encode(bOut);
+
+        PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
+        OutputStream lOut = lGen.open(bOut, PGPLiteralData.BINARY,
+                PGPLiteralData.CONSOLE, messageCharArray.length, new Date());
+
+        for (byte c : messageCharArray) {
+            lOut.write(c);
+            signatureGenerator.update(c);
+        }
+
+        lOut.close();
+        /*
+         * while ((ch = message.toCharArray().read()) >= 0) { lOut.write(ch);
+         * sGen.update((byte) ch); }
+         */
+        lGen.close();
+
+        signatureGenerator.generate().encode(bOut);
+
+        comData.close();
+
+        out.close();
+
+        return encOut.toString();
+    }
 //
 //
 //        try {

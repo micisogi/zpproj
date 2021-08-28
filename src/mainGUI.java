@@ -306,10 +306,10 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
-                if(message.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
-                    return;
-                }
+//                if(message.getText().isEmpty()) {
+//                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
+//                    return;
+//                }
                 if(from.getSelectedItem()==null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
@@ -337,13 +337,12 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Pogresna lozinka");
                     return;
                 }
-
                 try {
                     pgpmsg.sendMessage();
-                    chiphertext.setText(pgpmsg.compress(message.getText()).toString());
-                } catch (IOException e) {
+                } catch (IOException | PGPException e) {
                     e.printStackTrace();
                 }
+                chiphertext.setText(pgpmsg.getChipertext());
             }
         });
     }
