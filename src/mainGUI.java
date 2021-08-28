@@ -302,7 +302,7 @@ public class mainGUI extends JFrame {
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
-                if(!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
+                if(privacyCheckBox.isSelected() && (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected())) {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
@@ -337,9 +337,6 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Pogresna lozinka");
                     return;
                 }
-
-//                Utils.getInstance().
-//                System.out.println("User from "+ u.getName()+ "Pubkey"+ u.getDsaPubKey().);
 
                 try {
                     pgpmsg.sendMessage();

@@ -63,7 +63,10 @@ public class PGPMessage {
     public boolean verifyPassPhrase(){
         PGPPrivateKey pk = getPrivateKey();
         if(pk == null) return false;
-        else return true;
+        else {
+            System.out.println("VERIFIED SECRET KEY:" +pk.getKeyID());
+            return true;
+        }
     }
 
     public String getChipertext() {
