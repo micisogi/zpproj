@@ -1,6 +1,9 @@
 package utils;
 
 import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
 import java.io.*;
@@ -297,7 +300,6 @@ public class KeyRingHelper {
         }
     }
 
-
     private void savePublicKeyRingCollectionToFile(PGPPublicKeyRingCollection prc) throws IOException {
         byte myEncoded[] = prc.getEncoded();
         try (FileOutputStream fos = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
@@ -326,5 +328,27 @@ public class KeyRingHelper {
             return false;
         }
         return true;
+    }
+
+    private PGPSecretKey getSecretKey(String userInfo) throws IOException {
+        List<PGPSecretKey> secretKeyRing = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
+        for (Iterator<PGPSecretKey> it = secretKeyRing.iterator(); it.hasNext(); ) {
+            PGPSecretKey sk = it.next();
+            if(sk.getUserIDs().hasNext())
+                if(sk.getUserIDs().next().equals(userInfo)){
+                    System.out.println("SIGN AS: "+sk.getUserIDs().next()+ " ENCRYPT FOR: " + userInfo);
+                    System.out.println("SECRET KEY:" +sk.getKeyID());
+                    return sk;
+                }
+        }
+        return null;
+    }
+
+    public PGPPrivateKey getPrivateKey(String userInfo, String passPhrase) throws IOException, PGPException{
+
+        PGPSecretKey secret = getSecretKey(userInfo);
+        PBESecretKeyDecryptor decryptor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase.toCharArray());
+        return secret.extractPrivateKey(decryptor);
+
     }
 }

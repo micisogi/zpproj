@@ -107,12 +107,8 @@ public class Utils {
         return old.substring(0, at) + toInsert + old.substring(at);
     }
 
-    public void getDSAPublicKeyFromFile(List<PGPPublicKey> list, String userID){}
+    public void readPublicKeysFromFile(){
 
-    public void getDSASecretKeyFromFile(List<PGPSecretKey> list, String userID){}
-
-    public void getElGamPublicKeyFromFile(List<PGPPublicKey> list, String userID){}
-
-    public void getElGamSecretKeyFromFile(List<PGPSecretKey> list, String userID){}
+    }
 
 }
