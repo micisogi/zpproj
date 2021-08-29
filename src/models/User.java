@@ -7,6 +7,9 @@ import utils.Utils;
 
 import java.util.Date;
 
+/**
+ *  A model class used to store User data.
+ */
 public class User {
     private String name;
     private String email;

@@ -37,6 +37,9 @@ public class Utils {
         return users;
     }
 
+    /**
+     * @return instance of representing singleton pattern
+     */
     public static Utils getInstance() {
         if (instance == null) {
             synchronized (Utils.class) {
@@ -48,12 +51,22 @@ public class Utils {
         return instance;
     }
 
+    /**
+     * A Util function used to format ID of keys
+     *
+     * @param name
+     * @param email
+     * @return
+     */
     public String formatNameAndEmail(String name, String email) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(name).append(" <").append(email).append(">");
         return stringBuilder.toString();
     }
 
+    /** A Util function to refresh key table with new data
+     * @param model
+     */
     public static void refreshTable(DefaultTableModel model) {
         try {
             Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
@@ -64,7 +77,11 @@ public class Utils {
 
     }
 
-
+    /**
+     * A Util function to put all the secret keys from the collection into the table
+     * @param list
+     * @param model
+     */
     public void pgpSecretKeyListToObject(List<PGPSecretKey> list, DefaultTableModel model) {
         users.removeAll(users);
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
@@ -91,7 +108,11 @@ public class Utils {
             model.addRow(o);
         }
     }
-
+    /**
+     * A Util function to put all the public keys from the collection into the table
+     * @param list
+     * @param model
+     */
     public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         for (PGPPublicKey ppk : list
@@ -131,10 +152,21 @@ public class Utils {
         }
     }
 
+    /**
+     * A Util function to represent the keyID in HEX
+     * @param hexString
+     * @return
+     */
     public long hexStringToLongID(String hexString) {
         return new BigInteger(hexString, 16).longValue();
     }
 
+    /**
+     * A Util function to insert a dot after a String. Used to append an extension.
+     * @param old
+     * @param toInsert
+     * @return
+     */
     public static String insertStringBeforeDot(String old, String toInsert) {
         int at = old.lastIndexOf(".");
         return old.substring(0, at) + toInsert + old.substring(at);
