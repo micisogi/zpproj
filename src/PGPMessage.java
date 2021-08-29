@@ -13,6 +13,8 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import utils.KeyRingHelper;
 import utils.Utils;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
@@ -113,6 +115,8 @@ public class PGPMessage {
 
     }
 
+
+
     public void sendMessage() throws IOException, PGPException {
         if(authentication){
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
@@ -208,4 +212,44 @@ public class PGPMessage {
             System.out.println("signature verification failed.");
         }
     }
+
+
+
+
+//            byte myEncoded[] = chiphertext.getEncoded();
+//            try (FileOutputStream fos = new FileOutputStream(filePath)) {
+//                fos.write(myEncoded);
+//            }
+//            try {
+//                InputStream fIn = new BufferedInputStream(new FileInputStream(absolutePath));
+//                ArmoredOutputStream aOut = new ArmoredOutputStream(out);
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//
+//            aOut.beginClearText(digest);
+
+//            try {
+
+//                DefaultTableModel model = (DefaultTableModel) table1.getModel();
+//                int iDColumn = 3;
+//                int row = table1.getSelectedRow();
+//                String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
+//            KeyRingHelper.getInstance().exportPublicKeyRing(hexValue, Utils.insertStringBeforeDot(absolutePath, "_pub"));
+//                KeyRingHelper.getInstance().exportSecretKeyRing(hexValue, Utils.insertStringBeforeDot(absolutePath, "_sec"));
+
+
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (PGPException e) {
+//                try {
+////                    KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
+////                } catch (IOException ioException) {
+////                    ioException.printStackTrace();
+////                } catch (PGPException pgpException) {
+//                    pgpException.printStackTrace();
+//                }
+//                e.printStackTrace();
+//            }
+
 }
