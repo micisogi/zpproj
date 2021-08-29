@@ -1,6 +1,12 @@
+import models.FromModel;
+import models.SendToModel;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+import org.bouncycastle.openpgp.PGPSecretKey;
+import utils.FromComboBoxModel;
 import utils.KeyRingHelper;
 import utils.Utils;
 import models.User;
@@ -20,6 +26,7 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 public class mainGUI extends JFrame {
     private JPanel mainPanel;
@@ -48,7 +55,7 @@ public class mainGUI extends JFrame {
     private JButton exportButton;
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
-    private JComboBox from;
+    private JComboBox<FromModel> from;
     private JComboBox sendTo;
     private JButton receive;
     private ButtonGroup dsaButtonGroup;
@@ -67,10 +74,67 @@ public class mainGUI extends JFrame {
         initExportButton();
         initSendButton();
         initReceiveButton();
+        initDropDowns();
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+    }
+
+    private void initDropDowns() {
+        initFromDropdown();
+        initSendToDropdown();
+    }
+
+    private void initSendToDropdown() {
+        try {
+            List<PGPPublicKey> pgpPublicKeyList = KeyRingHelper.getInstance().getPublicKeyRingsFromFile();
+            ArrayList<PGPPublicKey> listOfKeysForEncription = new ArrayList<>();
+            int k = 0;
+            for (int i = 0; i < pgpPublicKeyList.size(); i++) {
+                if (pgpPublicKeyList.get(i).isEncryptionKey()) {
+                    listOfKeysForEncription.add(pgpPublicKeyList.get(i));
+                }
+            }
+            SendToModel[] models = new SendToModel[listOfKeysForEncription.size()];
+            for (int i = 0; i < models.length; i++) {
+                PGPPublicKey psk = listOfKeysForEncription.get(i);
+                if (psk.getUserIDs().hasNext()) {
+                    models[i] = new SendToModel(psk.getUserIDs().next(), psk);
+                }
+                else{
+                    models[i]= new SendToModel(null,psk);
+                }
+            }
+            DefaultComboBoxModel myModel = new DefaultComboBoxModel<>(models);
+
+            sendTo.setModel(myModel);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initFromDropdown() {
+        try {
+            List<PGPSecretKey> pgpSecretKeyList = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
+            ArrayList<PGPSecretKey> listOfKeysForSigning = new ArrayList<>();
+            int k = 0;
+            for (int i = 0; i < pgpSecretKeyList.size(); i++) {
+                if (pgpSecretKeyList.get(i).isSigningKey()) {
+                    listOfKeysForSigning.add(pgpSecretKeyList.get(i));
+                }
+            }
+            FromModel[] models = new FromModel[listOfKeysForSigning.size()];
+            for (int i = 0; i < models.length; i++) {
+                PGPSecretKey psk = listOfKeysForSigning.get(i);
+                models[i] = new FromModel(psk.getUserIDs().next(), psk);
+            }
+            DefaultComboBoxModel myModel = new DefaultComboBoxModel<>(models);
+
+            from.setModel(myModel);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initReceiveButton() {
@@ -194,8 +258,6 @@ public class mainGUI extends JFrame {
                     }
                 }
 
-                setDropDownList(from);
-                setDropDownList(sendTo);
 
             }
         });
@@ -228,8 +290,7 @@ public class mainGUI extends JFrame {
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                        setDropDownList(sendTo);
-                        setDropDownList(from);
+                        initDropDowns();
 
                         Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
@@ -277,8 +338,7 @@ public class mainGUI extends JFrame {
                     }
                     try {
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                        setDropDownList(sendTo);
-                        setDropDownList(from);
+                        initDropDowns();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -302,8 +362,6 @@ public class mainGUI extends JFrame {
         scrollPane.setViewportView(table1);
         DefaultTableModel model = (DefaultTableModel) table1.getModel();
         Utils.refreshTable(model);
-        setDropDownList(from);
-        setDropDownList(sendTo);
     }
 
     private void initSendButton() {
@@ -325,7 +383,7 @@ public class mainGUI extends JFrame {
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
-                if(privacyCheckBox.isSelected() && (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected())) {
+                if (privacyCheckBox.isSelected() && (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected())) {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
@@ -333,7 +391,7 @@ public class mainGUI extends JFrame {
 //                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
 //                    return;
 //                }
-                if(from.getSelectedItem()==null) {
+                if (from.getSelectedItem() == null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
@@ -343,7 +401,7 @@ public class mainGUI extends JFrame {
                 }
 
                 String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
-                if(passPhrase==null){
+                if (passPhrase == null) {
                     return;
                 }
 
@@ -388,7 +446,7 @@ public class mainGUI extends JFrame {
         return null;
     }
 
-    public void saveMessage(String chipertex){
+    public void saveMessage(String chipertex) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
