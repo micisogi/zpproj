@@ -15,8 +15,24 @@ import java.security.*;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Date;
 
+/**
+ * A class used to generate Key Pairs
+ */
 public class DSAElGamalKeyRingGenerator {
 
+    /**
+     * Function used to generate and save secret and public key value pairs based on the parameters passed into it
+     * @param dsaKeySize
+     * @param elGamalKeySize
+     * @param name
+     * @param email
+     * @param passPhrase
+     * @throws NoSuchProviderException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidAlgorithmParameterException
+     * @throws IOException
+     * @throws PGPException
+     */
     public void generateDSAELGamalKeyRing(Integer dsaKeySize, Integer elGamalKeySize, String name,
                                           String email, String passPhrase)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, PGPException {
@@ -46,6 +62,11 @@ public class DSAElGamalKeyRingGenerator {
 
     }
 
+    /**
+     * Function used to generate and ElGamal key pair give the
+     * @param elGamalKeySize
+     * @return
+     */
     private KeyPair generateElGamalKeyPair(Integer elGamalKeySize) {
         KeyPairGenerator elgKpg = null;
         try {

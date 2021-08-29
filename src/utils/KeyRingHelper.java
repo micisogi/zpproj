@@ -12,6 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 
 
+/**
+ * A Util singleton class used to manipulate KeyRings.
+ */
 public class KeyRingHelper {
 
     public static String PUBLIC_KEY_RING_COLLECTION_FILE_PATH = "pbkc.dat";
@@ -37,6 +40,11 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * Function to return an object of the singleton
+     * @return
+     * @throws IOException
+     */
     public static KeyRingHelper getInstance() throws IOException {
         if (instance == null) {
             synchronized (KeyRingHelper.class) {
@@ -48,6 +56,11 @@ public class KeyRingHelper {
         return instance;
     }
 
+    /**
+     * A helper function to save a secret key ring to the secret key ring collection file
+     * @param pgpSecretKeyRing
+     * @return
+     */
     public Iterator<PGPSecretKeyRing> saveSecretKeyRing(PGPSecretKeyRing pgpSecretKeyRing) {
         try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPSecretKeyRingCollection pgpSecCollection = new PGPSecretKeyRingCollection(
@@ -70,6 +83,11 @@ public class KeyRingHelper {
     }
 
 
+    /**
+     * A helper function to save a secret key ring to the public key ring collection file
+     * @param pgpPublicKeyRing
+     * @return
+     */
     public Iterator<PGPPublicKeyRing> savePublicKeyRing(PGPPublicKeyRing pgpPublicKeyRing) {
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
@@ -89,6 +107,10 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to delete a Key Ring
+     * @param keyRingIdHexa
+     */
     public void deleteKeyRing(String keyRingIdHexa) {
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
@@ -115,6 +137,10 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to remove the secret key from the secretKeyRingCollection
+     * @param keyId
+     */
     private void removeSecretKey(long keyId) {
         try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPSecretKeyRingCollection pgpSecretKeyRingCollection = new PGPSecretKeyRingCollection(
@@ -139,6 +165,10 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to return a list of secret keys stored in the secret key ring collection file
+     * @return
+     */
     public List<PGPSecretKey> getSecretKeyRingsFromFile() {
         ArrayList<PGPSecretKey> pgpSecretKeyList = new ArrayList<>();
         try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
@@ -165,6 +195,10 @@ public class KeyRingHelper {
         return null;
     }
 
+    /**
+     * A helper function used to return a list of public keys stored in the public key ring collection file
+     * @return
+     */
     public List<PGPPublicKey> getPublicKeyRingsFromFile() {
         ArrayList<PGPPublicKey> pgpPublicKeyList = new ArrayList<>();
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
@@ -177,7 +211,7 @@ public class KeyRingHelper {
                 Iterator keyIter = keyRing.getPublicKeys();
                 while (keyIter.hasNext()) {
                     PGPPublicKey key = (PGPPublicKey) keyIter.next();
-                        pgpPublicKeyList.add(key);
+                    pgpPublicKeyList.add(key);
                 }
             }
             return pgpPublicKeyList;
@@ -187,6 +221,13 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to read a public .asc file
+     * @param fileName
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     public PGPPublicKey readPublicKey(String fileName) throws IOException, PGPException {
         InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
         PGPPublicKey pubKey = readPublicKey(keyIn);
@@ -194,6 +235,13 @@ public class KeyRingHelper {
         return pubKey;
     }
 
+    /**
+     * A helper function to insert a public key into the public key ring collection file
+     * @param input
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     private PGPPublicKey readPublicKey(InputStream input) throws IOException, PGPException {
         PGPPublicKeyRing pgpPub = new PGPPublicKeyRing(
                 PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
@@ -216,16 +264,16 @@ public class KeyRingHelper {
                 }
             }
         }
-
-        //
-        // we just loop through the collection till we find a key suitable for encryption, in the real
-        // world you would probably want to be a bit smarter about this.
-        //
-
-
         return null;
     }
 
+    /**
+     * A helper function used to read a secret .asc file
+     * @param fileName
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     public PGPSecretKey readSecretKey(String fileName) throws IOException, PGPException {
         InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
         PGPSecretKey secKey = readSecretKey(keyIn);
@@ -233,17 +281,17 @@ public class KeyRingHelper {
         return secKey;
     }
 
+    /**
+     * A helper function to insert a secret key into the secret key ring collection file
+     * @param input
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     private PGPSecretKey readSecretKey(InputStream input) throws IOException, PGPException {
         PGPSecretKeyRingCollection pgpSec = new PGPSecretKeyRingCollection(
                 PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
-
-        //
-        // we just loop through the collection till we find a key suitable for encryption, in the real
-        // world you would probably want to be a bit smarter about this.
-        //
-
         Iterator keyRingIter = pgpSec.getKeyRings();
-//        pgpSec = PGPSecretKeyRingCollection.addSecretKeyRing(pgpSec,keyRingIter.next());
         while (keyRingIter.hasNext()) {
             PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
             saveSecretKeyRing(keyRing);
@@ -259,6 +307,13 @@ public class KeyRingHelper {
         throw new IllegalArgumentException("Can't find signing key in key ring.");
     }
 
+    /**
+     * A helper function used to export the public key ring into a .asc file
+     * @param keyRingIdHexa
+     * @param filePath
+     * @throws IOException
+     * @throws PGPException
+     */
     public void exportPublicKeyRing(String keyRingIdHexa, String filePath) throws IOException, PGPException {
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
@@ -274,6 +329,13 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to export the secret key ring into a .asc file
+     * @param keyRingIdHexa
+     * @param filePath
+     * @throws IOException
+     * @throws PGPException
+     */
     public void exportSecretKeyRing(String keyRingIdHexa, String filePath) throws IOException, PGPException {
         try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPSecretKeyRingCollection pgpSecCollection = new PGPSecretKeyRingCollection(
@@ -288,6 +350,11 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to save a public key ring collection into a file
+     * @param prc
+     * @throws IOException
+     */
     private void savePublicKeyRingCollectionToFile(PGPPublicKeyRingCollection prc) throws IOException {
         byte myEncoded[] = prc.getEncoded();
         try (FileOutputStream fos = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
@@ -297,6 +364,11 @@ public class KeyRingHelper {
 
     }
 
+    /**
+     * A helper function used to save a secret key ring collection into a file
+     * @param src
+     * @throws IOException
+     */
     private void saveSecretKeyRingCollectionToFile(PGPSecretKeyRingCollection src) throws IOException {
         byte myEncoded[] = src.getEncoded();
         try (FileOutputStream fos = new FileOutputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
@@ -304,6 +376,13 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to check if a public key ring with given Id exists
+     * @param keyRingId
+     * @param pkrc
+     * @return
+     * @throws PGPException
+     */
     private boolean checkIfPublicKeyRingWithIdExists(long keyRingId, PGPPublicKeyRingCollection pkrc) throws PGPException {
         if (pkrc.getPublicKeyRing(keyRingId) == null) {
             return false;
@@ -311,6 +390,13 @@ public class KeyRingHelper {
         return true;
     }
 
+    /**
+     * A helper function used to check if a secret key ring with given Id exists
+     * @param keyRingId
+     * @param skrc
+     * @return
+     * @throws PGPException
+     */
     private boolean checkIfSecretKeyRingWithIdExists(long keyRingId, PGPSecretKeyRingCollection skrc) throws PGPException {
         if (skrc.getSecretKeyRing(keyRingId) == null) {
             return false;
@@ -318,26 +404,46 @@ public class KeyRingHelper {
         return true;
     }
 
-    public PGPSecretKey getSecretKey(String userInfo) throws IOException {
+    /**
+     * A helper function used to return a secret key from the secret key ring collection file
+     * @param userId
+     * @return
+     * @throws IOException
+     */
+    public PGPSecretKey getSecretKey(long userId) throws IOException {
         List<PGPSecretKey> secretKeyRing = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
         for (Iterator<PGPSecretKey> it = secretKeyRing.iterator(); it.hasNext(); ) {
             PGPSecretKey sk = it.next();
-            if (sk.getUserIDs().hasNext())
-                if (sk.getUserIDs().next().equals(userInfo)) {
-                    return sk;
-                }
+            if (sk.getKeyID() == userId) {
+                return sk;
+            }
         }
         return null;
     }
 
-    public PGPPrivateKey getPrivateKey(String userInfo, String passPhrase) throws IOException, PGPException {
+    /**
+     * A helper function used to check if password for the secret key matches
+     * @param userId
+     * @param passPhrase
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
+    public PGPPrivateKey getPrivateKey(long userId, String passPhrase) throws IOException, PGPException {
 
-        PGPSecretKey secret = getSecretKey(userInfo);
+        PGPSecretKey secret = getSecretKey(userId);
         PBESecretKeyDecryptor decryptor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase.toCharArray());
         return secret.extractPrivateKey(decryptor);
 
     }
 
+    /**
+     * A helper function used to return a public key from the public key ring collection file
+     * @param keyID
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     public PGPPublicKey getPublicKey(long keyID) throws IOException, PGPException {
         try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(

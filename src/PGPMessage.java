@@ -1,44 +1,42 @@
 import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 import utils.KeyRingHelper;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.security.SecureRandom;
-import java.nio.Buffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
 
+/**
+ * A class used to generate a PGPMessage
+ */
 public class PGPMessage {
     private String message;
-    String from;
+    long from;
     String sendTo;
     private boolean authentication, privacy, compression, conversion, des, idea;
     private String chipertext;
-    User userfrom;
     User userSendTo;
     String passPhrase;
     PGPPrivateKey privateKey;
 
     public PGPMessage(String message,
-                      String from,
+                      long from,
                       String sendTo,
                       boolean authentication,
                       boolean privacy,
                       boolean compression,
                       boolean conversion,
                       boolean des,
+                      int symetricKeyAlgorithm,
                       boolean idea,
                       String passPhrase) {
         this.message = message;
@@ -52,11 +50,14 @@ public class PGPMessage {
         this.idea = idea;
         this.passPhrase = passPhrase;
 
-        userfrom = User.getInfoFromUser(from.toString());
         userSendTo = User.getInfoFromUser(sendTo.toString());
 
     }
 
+    /**
+     * A helper function used to get the secret key
+     * @return
+     */
     public PGPPrivateKey getPrivateKey() {
         try {
             return privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
@@ -66,6 +67,10 @@ public class PGPMessage {
         }
     }
 
+    /**
+     * Function used to verify the passphrase entered for the secret key
+     * @return
+     */
     public boolean verifyPassPhrase() {
         PGPPrivateKey pk = getPrivateKey();
         if (pk == null) return false;
@@ -83,6 +88,12 @@ public class PGPMessage {
         this.chipertext = chipertext;
     }
 
+    /**
+     * A function used to compress a message
+     * @param message
+     * @return
+     * @throws IOException
+     */
     public byte[] compress(String message) throws IOException {
         byte[] data = message.getBytes();
         PGPCompressedDataGenerator compressGen = new PGPCompressedDataGenerator(PGPCompressedData.ZIP);
@@ -113,7 +124,11 @@ public class PGPMessage {
     }
 
 
-
+    /**
+     * A function used to generate and save a message into a file
+     * @throws IOException
+     * @throws PGPException
+     */
     public void sendMessage() throws IOException, PGPException {
         if (authentication) {
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
@@ -126,9 +141,19 @@ public class PGPMessage {
         }
     }
 
+    /**
+     * Function used to sign a message with a secret key
+     * @param message
+     * @param secretKey
+     * @param from
+     * @param passPhrase
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
-                                               String from,
+                                               long from,
                                                String passPhrase) throws IOException, PGPException {
 
         byte[] messageCharArray = message.getBytes();
@@ -166,6 +191,12 @@ public class PGPMessage {
         return encOut.toString();
     }
 
+    /**
+     * Function used to verify an OpenPGP file
+     * @param in
+     * @return
+     * @throws Exception
+     */
     public static boolean verifyFile(
             InputStream in)
             throws Exception {
@@ -188,7 +219,7 @@ public class PGPMessage {
         KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
 
         PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-        if(key == null){
+        if (key == null) {
             System.out.println("signature verification failed.");
             return false;
         }
@@ -214,6 +245,13 @@ public class PGPMessage {
         }
     }
 
+    /**
+     * Function used to encrypt a message using a session key generated in it
+     * @param message
+     * @param pgpPublicKey
+     * @param symetricAlgoritmCode
+     * @return
+     */
     public byte[] encryptMessageUsingSessionKey(String message, PGPPublicKey pgpPublicKey, int symetricAlgoritmCode) {
         try {
             OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test")));
@@ -237,8 +275,6 @@ public class PGPMessage {
 //    public byte[] decryptMessage(byte[] message,PGPPrivateKey pgpPrivateKey){
 //
 //    }
-
-
 
 
 //            byte myEncoded[] = chiphertext.getEncoded();
