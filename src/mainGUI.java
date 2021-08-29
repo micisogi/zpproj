@@ -370,7 +370,6 @@ public class mainGUI extends JFrame {
                 } catch (IOException | PGPException e) {
                     e.printStackTrace();
                 }
-
             }
         });
     }
@@ -390,16 +389,14 @@ public class mainGUI extends JFrame {
     public void saveMessage(String chipertex){
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("*.asc", "asc"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
         int result = fileChooser.showOpenDialog(mainPanel);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             String absolutePath = selectedFile.getAbsolutePath();
-            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("asc"))
-                absolutePath += ".asc";
-
-
-            System.out.println(Utils.insertStringBeforeDot(absolutePath, "_msg"));
+            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
+                absolutePath += ".txt";
+//            System.out.println(Utils.insertStringBeforeDot(absolutePath, "_msg"));
 
             byte message[] = chipertex.getBytes(StandardCharsets.UTF_8);
             try (FileOutputStream fos = new FileOutputStream(Utils.insertStringBeforeDot(absolutePath, "_msg"))) {
