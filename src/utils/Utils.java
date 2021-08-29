@@ -66,7 +66,6 @@ public class Utils {
 
 
     public void pgpSecretKeyListToObject(List<PGPSecretKey> list, DefaultTableModel model) {
-        System.out.println("PRIVATE LIST SIZE : " + list.size());
         model.getDataVector().removeAllElements();
         users.removeAll(users);
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
@@ -81,7 +80,6 @@ public class Utils {
                 u.setDsaSecretKey(sk);
                 users.add(u);
             } else {
-                System.out.println("SETTING PUBLIC KEY");
                 u.setElgamalPubKey(sk.getPublicKey());
                 u.setElgamalSecretKey(sk);
             }
@@ -91,13 +89,11 @@ public class Utils {
             o[3] = Long.toHexString(sk.getKeyID());
             o[4] = sk.getPublicKey().getAlgorithm() == 17 ? "DSA" : "ElGamal";
             o[5] = "PRIVATE";
-            System.out.println("ADDING PRIVATE");
             model.addRow(o);
         }
     }
 
     public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
-        System.out.println("PUBLIC LIST SIZE: " + list.size());
         SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         for (PGPPublicKey ppk : list
         ) {
@@ -111,7 +107,6 @@ public class Utils {
                 o[3] = Long.toHexString(ppk.getKeyID());
                 o[4] = ppk.getAlgorithm() == 17 ? "DSA" : "ElGamal";
                 o[5] = "PUBLIC";
-                System.out.println("ADDING PUBLIC");
                 model.addRow(o);
             } else {
                 User u = new User("");
@@ -131,7 +126,6 @@ public class Utils {
                 o[3] = Long.toHexString(ppk.getKeyID());
                 o[4] = ppk.getAlgorithm() == 17 ? "DSA" : "ElGamal";
                 o[5] = "PUBLIC";
-                System.out.println("ADDING PUBLIC");
                 model.addRow(o);
             }
 
@@ -146,9 +140,4 @@ public class Utils {
         int at = old.lastIndexOf(".");
         return old.substring(0, at) + toInsert + old.substring(at);
     }
-
-    public void readPublicKeysFromFile() {
-
-    }
-
 }

@@ -1,14 +1,22 @@
 import models.User;
+import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 import utils.KeyRingHelper;
 
 import java.io.*;
 import java.security.SecureRandom;
+import java.nio.Buffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Iterator;
 
 public class PGPMessage {
     private String message;
@@ -19,6 +27,7 @@ public class PGPMessage {
     User userfrom;
     User userSendTo;
     String passPhrase;
+    PGPPrivateKey privateKey;
 
     public PGPMessage(String message,
                       String from,
@@ -48,7 +57,7 @@ public class PGPMessage {
 
     public PGPPrivateKey getPrivateKey() {
         try {
-            return KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+            return privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
         } catch (IOException | PGPException e) {
 //            e.printStackTrace();
             return null;
@@ -58,7 +67,10 @@ public class PGPMessage {
     public boolean verifyPassPhrase() {
         PGPPrivateKey pk = getPrivateKey();
         if (pk == null) return false;
-        else return true;
+        else {
+            System.out.println("VERIFIED SECRET KEY:" + pk.getKeyID());
+            return true;
+        }
     }
 
     public String getChipertext() {
@@ -98,45 +110,57 @@ public class PGPMessage {
 
     }
 
-    public void sendMessage() {
+    public void sendMessage() throws IOException, PGPException {
         if (authentication) {
+            PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
+            String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
 
+            chipertext = messageSignature;
+        }
+        if (privacy) {
+//            PGPPublicKey publicKey = KeyRingHelper.getInstance().getPublicKey();
         }
     }
 
-//
-//
-//        try {
-//            OutputStream outmessage = new FileOutputStream("output.txt");
-//            // Converts the string into bytes
-//            byte[] dataBytes = data.getBytes();
-//            // Writes data to the output stream
-//            outmessage.write(dataBytes);
-//            // Closes the output stream
-//            PGPCompressedDataGenerator compGen = new PGPCompressedDataGenerator(PGPCompressedData.ZIP);
-//            OutputStream compressedOut = compGen.open(outmessage, new byte[4096]);
-//
-//            PGPLiteralDataGenerator literalGen = new PGPLiteralDataGenerator();
-//            OutputStream literalOut = literalGen.open(
-//                    compressedOut,
-//                    PGPLiteralData.BINARY,
-//                    "",
-//                    new Date(),
-//                    new byte[4096]);
-//
-//            literalGen.close();
-//            compGen.close();
-//            outmessage.close();
-//
-//
-//
-//        }
-//
-//        catch (Exception e) {
-//            e.getStackTrace();
-//        }
-//
-//    }
+    private static String signMessageByteArray(String message,
+                                               PGPSecretKey secretKey,
+                                               String from,
+                                               String passPhrase) throws IOException, PGPException {
+
+        byte[] messageCharArray = message.getBytes();
+        PGPPrivateKey privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+        PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
+        signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
+
+        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+        OutputStream out = encOut;
+        out = new ArmoredOutputStream(out);
+
+        Iterator it = secretKey.getPublicKey().getUserIDs();
+        if (it.hasNext()) {
+            PGPSignatureSubpacketGenerator spGen = new PGPSignatureSubpacketGenerator();
+            spGen.setSignerUserID(false, (String) it.next());
+            signatureGenerator.setHashedSubpackets(spGen.generate());
+        }
+        PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(PGPCompressedData.ZLIB);
+        BCPGOutputStream bOut = new BCPGOutputStream(cGen.open(out));
+        signatureGenerator.generateOnePassVersion(false).encode(bOut);
+
+        PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
+        OutputStream lOut = lGen.open(bOut, PGPLiteralData.BINARY,
+                PGPLiteralData.CONSOLE, messageCharArray.length, new Date());
+        for (byte c : messageCharArray) {
+            lOut.write(c);
+            signatureGenerator.update(c);
+        }
+
+        lGen.close();
+        signatureGenerator.generate().encode(bOut);
+        cGen.close();
+        out.close();
+
+        return encOut.toString();
+    }
 
     public static void verifyFile(
             InputStream in)
@@ -182,12 +206,19 @@ public class PGPMessage {
 
     public byte[] encryptMessageUsingSessionKey(String message, PGPPublicKey pgpPublicKey, int symetricAlgoritmCode) {
         try {
+            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test")));
             byte[] bytes = compress(message);
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
                     new JcePGPDataEncryptorBuilder(symetricAlgoritmCode).setWithIntegrityPacket(true).setSecureRandom(new SecureRandom()).setProvider("BC"));
-            encGen.addMethod();
+            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
+            OutputStream cOut = encGen.open(out, bytes.length);
+
+            cOut.write(bytes);
+            cOut.close();
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (PGPException e) {
             e.printStackTrace();
         }
         return null;

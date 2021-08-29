@@ -197,7 +197,6 @@ public class mainGUI extends JFrame {
         for (User u : Utils.getInstance().users) {
             emails.add(u.getNameAndEmail());
         }
-//        System.out.println(emails.size());
         list.setModel(new DefaultComboBoxModel<String>(emails.toArray(new String[0])));
 
     }
@@ -213,19 +212,15 @@ public class mainGUI extends JFrame {
                 if (name.getText().isEmpty() || email.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
                 } else {
-                    System.out.println(Utils.getInstance().formatNameAndEmail(name.getText(), email.getText()));
                     DSAElGamalKeyRingGenerator dsael = new DSAElGamalKeyRingGenerator();
-                    System.out.println("DSA" + getSelectedButtonText(dsaButtonGroup));
                     Integer dsaSize = Integer.parseInt(getSelectedButtonText(dsaButtonGroup));
                     Integer elGamalSize = Integer.parseInt(getSelectedButtonText(elGamalButtonGroup));
                     String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
-                    System.out.println(passPhrase);
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
                         setDropDownList(sendTo);
                         setDropDownList(from);
-//                        System.out.println(Utils.getInstance().getUsers().size());
 
                         Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
@@ -321,15 +316,15 @@ public class mainGUI extends JFrame {
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
-                if (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
+                if(privacyCheckBox.isSelected() && (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected())) {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
-                if (message.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
-                    return;
-                }
-                if (from.getSelectedItem() == null) {
+//                if(message.getText().isEmpty()) {
+//                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
+//                    return;
+//                }
+                if(from.getSelectedItem()==null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
@@ -357,15 +352,12 @@ public class mainGUI extends JFrame {
                     return;
                 }
 
-//                Utils.getInstance().
-//                System.out.println("User from "+ u.getName()+ "Pubkey"+ u.getDsaPubKey().);
-
                 try {
                     pgpmsg.sendMessage();
-                    chiphertext.setText(pgpmsg.compress(message.getText()).toString());
-                } catch (IOException e) {
+                } catch (IOException | PGPException e) {
                     e.printStackTrace();
                 }
+                chiphertext.setText(pgpmsg.getChipertext());
             }
         });
     }
