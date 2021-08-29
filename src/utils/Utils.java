@@ -66,7 +66,6 @@ public class Utils {
 
 
     public void pgpSecretKeyListToObject(List<PGPSecretKey> list, DefaultTableModel model) {
-        model.getDataVector().removeAllElements();
         users.removeAll(users);
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
         User u = null;
@@ -94,7 +93,6 @@ public class Utils {
     }
 
     public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
-        model.getDataVector().removeAllElements();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         for (PGPPublicKey ppk : list
         ) {
