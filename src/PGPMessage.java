@@ -1,10 +1,10 @@
 import models.User;
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.CompressionAlgorithmTags;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.*;
+import org.bouncycastle.jcajce.provider.symmetric.IDEA;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
+import org.bouncycastle.openpgp.operator.bc.BcPBEDataDecryptorFactory;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
@@ -14,6 +14,7 @@ import utils.KeyRingHelper;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +31,7 @@ public class PGPMessage {
     User userSendTo;
     String passPhrase;
     PGPPrivateKey privateKey;
+    int symmetricKeyAlgorithm;
 
     public PGPMessage(String message,
                       String from,
@@ -54,6 +56,8 @@ public class PGPMessage {
 
         userfrom = User.getInfoFromUser(from.toString());
         userSendTo = User.getInfoFromUser(sendTo.toString());
+
+//        System.out.println(sendTo.toString());
 
     }
 
@@ -100,10 +104,6 @@ public class PGPMessage {
 
     }
 
-    public void privacy(String from, String sendTo, String alg) {
-
-    }
-
     public void compression() {
 
     }
@@ -119,10 +119,17 @@ public class PGPMessage {
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
             String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
 
-            chipertext = messageSignature;
+            chipertext += messageSignature;
         }
         if (privacy) {
-//            PGPPublicKey publicKey = KeyRingHelper.getInstance().getPublicKey();
+            PGPPublicKey publicKey = KeyRingHelper.getInstance().getPublicKey(Long.parseLong(sendTo,16));
+            symmetricKeyAlgorithm = idea? SymmetricKeyAlgorithmTags.IDEA : SymmetricKeyAlgorithmTags.TRIPLE_DES;
+            System.out.println("ID FOR ENCRYPTION: "+publicKey.getKeyID());
+
+            chipertext = createEncryptedData(publicKey,message,symmetricKeyAlgorithm);
+//            String encryptedMessage = null;
+//            encryptedMessage = encryptByteArray(message.getBytes(), publicKey);
+
         }
     }
 
@@ -234,47 +241,31 @@ public class PGPMessage {
         return null;
     }
 
-//    public byte[] decryptMessage(byte[] message,PGPPrivateKey pgpPrivateKey){
-//
-//    }
+    public static String createEncryptedData(
+            PGPPublicKey encryptionKey,
+            byte[] data, int symmetricKeyAlgorithm)
+            throws PGPException, IOException
+    {
+        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
+                new JcePGPDataEncryptorBuilder(symmetricKeyAlgorithm)
+                        .setWithIntegrityPacket(true)
+                        .setSecureRandom(new SecureRandom()).setProvider("BC"));
+        encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(encryptionKey).setProvider("BC"));
 
-
-
-
-//            byte myEncoded[] = chiphertext.getEncoded();
-//            try (FileOutputStream fos = new FileOutputStream(filePath)) {
-//                fos.write(myEncoded);
-//            }
-//            try {
-//                InputStream fIn = new BufferedInputStream(new FileInputStream(absolutePath));
-//                ArmoredOutputStream aOut = new ArmoredOutputStream(out);
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//
-//            aOut.beginClearText(digest);
-
-//            try {
-
-//                DefaultTableModel model = (DefaultTableModel) table1.getModel();
-//                int iDColumn = 3;
-//                int row = table1.getSelectedRow();
-//                String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
-//            KeyRingHelper.getInstance().exportPublicKeyRing(hexValue, Utils.insertStringBeforeDot(absolutePath, "_pub"));
-//                KeyRingHelper.getInstance().exportSecretKeyRing(hexValue, Utils.insertStringBeforeDot(absolutePath, "_sec"));
-
-
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } catch (PGPException e) {
-//                try {
-////                    KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
-////                } catch (IOException ioException) {
-////                    ioException.printStackTrace();
-////                } catch (PGPException pgpException) {
-//                    pgpException.printStackTrace();
-//                }
-//                e.printStackTrace();
-//            }
+        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+        // create an indefinite length encrypted stream
+        OutputStream out = encGen.open(encOut, new byte[4096]);
+        out = new ArmoredOutputStream(out);
+        // write out the literal data
+        PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
+        OutputStream pOut = lData.open(
+                out, PGPLiteralData.BINARY,
+                PGPLiteralData.CONSOLE, data.length, new Date());
+        pOut.write(data);
+        pOut.close();
+        // finish the encryption
+        out.close();
+        return encOut.toString();
+    }
 
 }
