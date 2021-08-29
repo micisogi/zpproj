@@ -166,7 +166,7 @@ public class PGPMessage {
         return encOut.toString();
     }
 
-    public static void verifyFile(
+    public static boolean verifyFile(
             InputStream in)
             throws Exception {
         in = PGPUtil.getDecoderStream(in);
@@ -188,6 +188,10 @@ public class PGPMessage {
         KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
 
         PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+        if(key == null){
+            System.out.println("signature verification failed.");
+            return false;
+        }
         FileOutputStream out = new FileOutputStream(p2.getFileName());
 
         ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
@@ -203,8 +207,10 @@ public class PGPMessage {
 
         if (ops.verify(p3.get(0))) {
             System.out.println("signature verified.");
+            return true;
         } else {
             System.out.println("signature verification failed.");
+            return false;
         }
     }
 

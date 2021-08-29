@@ -85,7 +85,14 @@ public class mainGUI extends JFrame {
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
                         FileInputStream fis = new FileInputStream(absolutePath);
-                        PGPMessage.verifyFile(fis);
+                        if(PGPMessage.verifyFile(fis)){
+                            JOptionPane.showMessageDialog(null, "Signature is valid.");
+                            return;
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "Signature verification failed.");
+                            return;
+                        }
                     } catch (FileNotFoundException fileNotFoundException) {
                         fileNotFoundException.printStackTrace();
                     } catch (Exception exception) {
@@ -391,10 +398,9 @@ public class mainGUI extends JFrame {
             String absolutePath = selectedFile.getAbsolutePath();
             if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
                 absolutePath += ".txt";
-//            System.out.println(Utils.insertStringBeforeDot(absolutePath, "_msg"));
 
             byte message[] = chipertex.getBytes(StandardCharsets.UTF_8);
-            try (FileOutputStream fos = new FileOutputStream(Utils.insertStringBeforeDot(absolutePath, "_msg"))) {
+            try (FileOutputStream fos = new FileOutputStream(absolutePath)) {
                 fos.write(message);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
