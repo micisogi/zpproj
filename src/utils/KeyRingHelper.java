@@ -177,7 +177,7 @@ public class KeyRingHelper {
                 Iterator keyIter = keyRing.getPublicKeys();
                 while (keyIter.hasNext()) {
                     PGPPublicKey key = (PGPPublicKey) keyIter.next();
-                    pgpPublicKeyList.add(key);
+                        pgpPublicKeyList.add(key);
                 }
             }
             return pgpPublicKeyList;
