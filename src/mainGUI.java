@@ -1,3 +1,4 @@
+import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import utils.KeyRingHelper;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -334,6 +336,9 @@ public class mainGUI extends JFrame {
                 }
 
                 String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+                if(passPhrase==null){
+                    return;
+                }
 
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
@@ -354,10 +359,13 @@ public class mainGUI extends JFrame {
 
                 try {
                     pgpmsg.sendMessage();
+                    chiphertext.setText(pgpmsg.getChipertext());
+                    saveMessage(chiphertext.getText());
+
                 } catch (IOException | PGPException e) {
                     e.printStackTrace();
                 }
-                chiphertext.setText(pgpmsg.getChipertext());
+
             }
         });
     }
@@ -372,6 +380,33 @@ public class mainGUI extends JFrame {
         }
 
         return null;
+    }
+
+    public void saveMessage(String chipertex){
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("*.asc", "asc"));
+        int result = fileChooser.showOpenDialog(mainPanel);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String absolutePath = selectedFile.getAbsolutePath();
+            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("asc"))
+                absolutePath += ".asc";
+
+
+            System.out.println(Utils.insertStringBeforeDot(absolutePath, "_msg"));
+
+            byte message[] = chipertex.getBytes(StandardCharsets.UTF_8);
+            try (FileOutputStream fos = new FileOutputStream(Utils.insertStringBeforeDot(absolutePath, "_msg"))) {
+                fos.write(message);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "You have to choose a key to export");
+        }
     }
 
 
