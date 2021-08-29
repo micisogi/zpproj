@@ -145,11 +145,10 @@ public class mainGUI extends JFrame {
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
                         FileInputStream fis = new FileInputStream(absolutePath);
-                        if(PGPMessage.verifyFile(fis)){
+                        if (PGPMessage.verifyFile(fis)) {
                             JOptionPane.showMessageDialog(null, "Signature is valid.");
                             return;
-                        }
-                        else {
+                        } else {
                             JOptionPane.showMessageDialog(null, "Signature verification failed.");
                             return;
                         }
@@ -285,10 +284,9 @@ public class mainGUI extends JFrame {
                     String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
-                        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                        Utils.refreshTable(model);
                         initDropDowns();
 
-                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
@@ -335,7 +333,6 @@ public class mainGUI extends JFrame {
                 } else {
                     JOptionPane.showMessageDialog(null, "You have to choose a key to delete");
                 }
-                Utils.refreshTable(model);
                 initDropDowns();
             }
         });
