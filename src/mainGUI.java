@@ -321,15 +321,15 @@ public class mainGUI extends JFrame {
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
-                if (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected()) {
+                if(privacyCheckBox.isSelected() && (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected())) {
                     JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
                     return;
                 }
-                if (message.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
-                    return;
-                }
-                if (from.getSelectedItem() == null) {
+//                if(message.getText().isEmpty()) {
+//                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
+//                    return;
+//                }
+                if(from.getSelectedItem()==null) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
@@ -362,10 +362,10 @@ public class mainGUI extends JFrame {
 
                 try {
                     pgpmsg.sendMessage();
-                    chiphertext.setText(pgpmsg.compress(message.getText()).toString());
-                } catch (IOException e) {
+                } catch (IOException | PGPException e) {
                     e.printStackTrace();
                 }
+                chiphertext.setText(pgpmsg.getChipertext());
             }
         });
     }

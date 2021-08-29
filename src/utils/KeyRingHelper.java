@@ -333,7 +333,7 @@ public class KeyRingHelper {
         return true;
     }
 
-    private PGPSecretKey getSecretKey(String userInfo) throws IOException {
+    public PGPSecretKey getSecretKey(String userInfo) throws IOException {
         List<PGPSecretKey> secretKeyRing = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
         for (Iterator<PGPSecretKey> it = secretKeyRing.iterator(); it.hasNext(); ) {
             PGPSecretKey sk = it.next();
