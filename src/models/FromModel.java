@@ -2,6 +2,9 @@ package models;
 
 import org.bouncycastle.openpgp.PGPSecretKey;
 
+/**
+ * A model class used to populate sender dropdown list
+ */
 public class FromModel {
     String nameEmail;
     PGPSecretKey secretKey;

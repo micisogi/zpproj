@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+/**
+ * Class used by the java swing to draw all the elements
+ */
 public class mainGUI extends JFrame {
     private JPanel mainPanel;
     private JTabbedPane tabbedPane1;
@@ -57,12 +60,18 @@ public class mainGUI extends JFrame {
     private JButton receive;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
+    private ButtonGroup symetricButtonGroup;
 
+    /**
+     * @param title
+     * @throws IOException
+     */
     public mainGUI(String title) throws IOException {
         super(title);
 
         initDsaButtonGroup();
         initElGamalButtonGroup();
+        initSymetricAlgsRadio();
 
         initTable();
         initDeleteButton();
@@ -73,16 +82,33 @@ public class mainGUI extends JFrame {
         initReceiveButton();
         initDropDowns();
 
+
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
     }
 
+    /**
+     * Function used to instantiate symetric algorithm radio buttons
+     */
+    private void initSymetricAlgsRadio() {
+        symetricButtonGroup = new ButtonGroup();
+        symetricButtonGroup.add(IDEARadioButton);
+        symetricButtonGroup.add(DESRadioButton);
+        DESRadioButton.setSelected(true);
+    }
+
+    /**
+     * Function used to instantiate drop down menus
+     */
     private void initDropDowns() {
         initFromDropdown();
         initSendToDropdown();
     }
 
+    /**
+     * Function used to instantiate recipient drop down menu
+     */
     private void initSendToDropdown() {
         try {
             List<PGPPublicKey> pgpPublicKeyList = KeyRingHelper.getInstance().getPublicKeyRingsFromFile();
@@ -110,6 +136,9 @@ public class mainGUI extends JFrame {
         }
     }
 
+    /**
+     * Function used to instantiate sender drop down menu
+     */
     private void initFromDropdown() {
         try {
             List<PGPSecretKey> pgpSecretKeyList = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
@@ -133,6 +162,9 @@ public class mainGUI extends JFrame {
         }
     }
 
+    /**
+     * Function used to instantiate receive button
+     */
     private void initReceiveButton() {
         receive.addActionListener(new ActionListener() {
             @Override
@@ -145,11 +177,10 @@ public class mainGUI extends JFrame {
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
                         FileInputStream fis = new FileInputStream(absolutePath);
-                        if(PGPMessage.verifyFile(fis)){
+                        if (PGPMessage.verifyFile(fis)) {
                             JOptionPane.showMessageDialog(null, "Signature is valid.");
                             return;
-                        }
-                        else {
+                        } else {
                             JOptionPane.showMessageDialog(null, "Signature verification failed.");
                             return;
                         }
@@ -163,6 +194,9 @@ public class mainGUI extends JFrame {
         });
     }
 
+    /**
+     * Function used to instantiate export button
+     */
     private void initExportButton() {
         exportButton.addActionListener(new ActionListener() {
             @Override
@@ -209,6 +243,9 @@ public class mainGUI extends JFrame {
 
     }
 
+    /**
+     * Function used to instantiate ElGamal size radio buttons
+     */
     private void initElGamalButtonGroup() {
         elGamalButtonGroup = new ButtonGroup();
         elGamalButtonGroup.add(elGamal1024);
@@ -216,7 +253,9 @@ public class mainGUI extends JFrame {
         elGamalButtonGroup.add(elGamal4096);
         elGamal1024.setSelected(true);
     }
-
+    /**
+     * Function used to instantiate DSA size radio buttons
+     */
     private void initDsaButtonGroup() {
         dsaButtonGroup = new ButtonGroup();
         dsaButtonGroup.add(DSA1024);
@@ -224,6 +263,9 @@ public class mainGUI extends JFrame {
         DSA1024.setSelected(true);
     }
 
+    /**
+     * Function used to instantiate import button
+     */
     private void initImportButton() {
         importButton.addActionListener(new ActionListener() {
 
@@ -259,15 +301,9 @@ public class mainGUI extends JFrame {
         });
     }
 
-    private void setDropDownList(JComboBox list) {
-        ArrayList<String> emails = new ArrayList<>();
-        for (User u : Utils.getInstance().users) {
-            emails.add(u.getNameAndEmail());
-        }
-        list.setModel(new DefaultComboBoxModel<String>(emails.toArray(new String[0])));
-
-    }
-
+    /**
+     * Function used to instantiate generate button
+     */
     private void initGenerateButton() {
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -285,10 +321,9 @@ public class mainGUI extends JFrame {
                     String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
-                        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
+                        Utils.refreshTable(model);
                         initDropDowns();
 
-                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {
                         e.printStackTrace();
                     } catch (NoSuchAlgorithmException e) {
@@ -313,6 +348,9 @@ public class mainGUI extends JFrame {
         frame.setVisible(true);
     }
 
+    /**
+     * Function used to instantiate delete button
+     */
     private void initDeleteButton() {
         deleteButton.addActionListener(new ActionListener() {
 
@@ -335,12 +373,15 @@ public class mainGUI extends JFrame {
                 } else {
                     JOptionPane.showMessageDialog(null, "You have to choose a key to delete");
                 }
-                Utils.refreshTable(model);
                 initDropDowns();
             }
         });
     }
 
+    /**
+     * Function used to instantiate the key rings table
+     * @throws IOException
+     */
     private void initTable() throws IOException {
         TableModel dataModel = new DefaultTableModel(Utils.columnNames, 0) {
             @Override
@@ -356,6 +397,9 @@ public class mainGUI extends JFrame {
         Utils.refreshTable(model);
     }
 
+    /**
+     * Function used to instantiate the send message button
+     */
     private void initSendButton() {
 
         from.addActionListener(new ActionListener() {
@@ -375,8 +419,20 @@ public class mainGUI extends JFrame {
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
-                if (privacyCheckBox.isSelected() && (!DESRadioButton.isSelected() && !IDEARadioButton.isSelected())) {
-                    JOptionPane.showMessageDialog(null, "Morate selektovati algoritam");
+                int symAlg = 2;
+                if (privacyCheckBox.isSelected()) {
+                    String alg = getSelectedButtonText(symetricButtonGroup);
+                    switch (alg) {
+                        case "3DES": {
+                            symAlg = 2;
+                            break;
+                        }
+                        case "IDEA": {
+                            symAlg = 1;
+                            break;
+                        }
+                    }
+
                     return;
                 }
 //                if(message.getText().isEmpty()) {
@@ -397,15 +453,18 @@ public class mainGUI extends JFrame {
                     return;
                 }
 
+                FromModel fr = (FromModel) from.getSelectedItem();
+                System.out.println(Long.toHexString(fr.getSecretKey().getKeyID()));
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
-                        from.getSelectedItem().toString(),
+                        fr.getSecretKey().getKeyID(),
                         sendTo.getSelectedItem().toString(),
                         authenticationCheckBox.isSelected(),
                         privacyCheckBox.isSelected(),
                         compressionCheckBox.isSelected(),
                         conversionCheckBox.isSelected(),
                         DESRadioButton.isSelected(),
+                        symAlg,
                         IDEARadioButton.isSelected(),
                         passPhrase);
 
@@ -426,6 +485,11 @@ public class mainGUI extends JFrame {
         });
     }
 
+    /**
+     * Function used to return a String value of the radio button selected inside the radio group
+     * @param buttonGroup
+     * @return
+     */
     public String getSelectedButtonText(ButtonGroup buttonGroup) {
         for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements(); ) {
             AbstractButton button = buttons.nextElement();
@@ -434,10 +498,13 @@ public class mainGUI extends JFrame {
                 return button.getText();
             }
         }
-
         return null;
     }
 
+    /**
+     * function used to save a  OpenPGP message into a text file
+     * @param chipertex
+     */
     public void saveMessage(String chipertex) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
