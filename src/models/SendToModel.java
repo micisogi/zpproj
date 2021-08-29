@@ -1,7 +1,6 @@
 package models;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPSecretKey;
 
 public class SendToModel {
 
