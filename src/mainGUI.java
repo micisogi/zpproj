@@ -1,6 +1,7 @@
 import models.FromModel;
 import models.SendToModel;
 import models.User;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
@@ -424,16 +425,14 @@ public class mainGUI extends JFrame {
                     String alg = getSelectedButtonText(symetricButtonGroup);
                     switch (alg) {
                         case "3DES": {
-                            symAlg = 2;
+                            symAlg = SymmetricKeyAlgorithmTags.TRIPLE_DES;
                             break;
                         }
                         case "IDEA": {
-                            symAlg = 1;
+                            symAlg = SymmetricKeyAlgorithmTags.IDEA;
                             break;
                         }
                     }
-
-                    return;
                 }
 //                if(message.getText().isEmpty()) {
 //                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
@@ -448,9 +447,12 @@ public class mainGUI extends JFrame {
                     return;
                 }
 
-                String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
-                if (passPhrase == null) {
-                    return;
+                String passPhrase = null;
+                if (authenticationCheckBox.isSelected()) {
+                     passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+                    if (passPhrase == null) {
+                        return;
+                    }
                 }
 
                 FromModel fr = (FromModel) from.getSelectedItem();
@@ -468,7 +470,7 @@ public class mainGUI extends JFrame {
                         IDEARadioButton.isSelected(),
                         passPhrase);
 
-                if (!pgpmsg.verifyPassPhrase()) {
+                if (authenticationCheckBox.isSelected() && !pgpmsg.verifyPassPhrase()) {
                     JOptionPane.showMessageDialog(null, "Pogresna lozinka");
                     return;
                 }
