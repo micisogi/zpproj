@@ -1,15 +1,12 @@
 import models.FromModel;
 import models.SendToModel;
-import org.bouncycastle.bcpg.ArmoredOutputStream;
+import models.User;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import utils.FromComboBoxModel;
 import utils.KeyRingHelper;
 import utils.Utils;
-import models.User;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -101,9 +98,8 @@ public class mainGUI extends JFrame {
                 PGPPublicKey psk = listOfKeysForEncription.get(i);
                 if (psk.getUserIDs().hasNext()) {
                     models[i] = new SendToModel(psk.getUserIDs().next(), psk);
-                }
-                else{
-                    models[i]= new SendToModel(null,psk);
+                } else {
+                    models[i] = new SendToModel(null, psk);
                 }
             }
             DefaultComboBoxModel myModel = new DefaultComboBoxModel<>(models);
@@ -322,10 +318,10 @@ public class mainGUI extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                DefaultTableModel model = (DefaultTableModel) table1.getModel();
                 // check for selected row first
                 if (table1.getSelectedRow() != -1) {
                     // remove selected row from the model
-                    DefaultTableModel model = (DefaultTableModel) table1.getModel();
                     int iDColumn = 3;
                     int row = table1.getSelectedRow();
                     String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
@@ -336,15 +332,11 @@ public class mainGUI extends JFrame {
                         e.printStackTrace();
 
                     }
-                    try {
-                        Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
-                        initDropDowns();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "You have to choose a key to delete");
                 }
+                Utils.refreshTable(model);
+                initDropDowns();
             }
         });
     }
