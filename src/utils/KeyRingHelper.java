@@ -27,13 +27,11 @@ public class KeyRingHelper {
 
         if (!existsPublicKeyCollection) {
             FileOutputStream fosPublic = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH);
-            System.out.println("FOS PUB BEFORE FLUSH");
             fosPublic.flush();
             fosPublic.close();
         }
         if (!existsSecretKeyCollection) {
             FileOutputStream fosSecret = new FileOutputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH);
-            System.out.println("FOS SEC BEFORE FLUSH");
             fosSecret.flush();
             fosSecret.close();
         }
@@ -78,7 +76,6 @@ public class KeyRingHelper {
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
             pgpPubCollection = PGPPublicKeyRingCollection.addPublicKeyRing(pgpPubCollection, pgpPublicKeyRing);
             for (PGPPublicKey pk : pgpPubCollection.iterator().next()) {
-                System.out.println("ID: " + pk.getKeyID());
             }
             byte myEncoded[] = pgpPubCollection.getEncoded();
             try (FileOutputStream fos = new FileOutputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
@@ -98,15 +95,12 @@ public class KeyRingHelper {
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
             long keyId = Utils.getInstance().hexStringToLongID(keyRingIdHexa);
             PGPPublicKeyRing keyRing = pgpPubCollection.getPublicKeyRing(keyId);
-            System.out.println("BEFORE: " + pgpPubCollection.size());
             if (checkIfPublicKeyRingWithIdExists(keyId, pgpPubCollection)) {
                 pgpPubCollection = PGPPublicKeyRingCollection.removePublicKeyRing(pgpPubCollection, keyRing);
             }
             removeSecretKey(keyId);
-            System.out.println("AFTER: " + pgpPubCollection.size());
             if (pgpPubCollection.iterator().hasNext()) {
                 for (PGPPublicKey pk : pgpPubCollection.iterator().next()) {
-                    System.out.println("ID: " + pk.getKeyID());
                 }
             }
             byte myEncoded[] = pgpPubCollection.getEncoded();
@@ -126,14 +120,11 @@ public class KeyRingHelper {
             PGPSecretKeyRingCollection pgpSecretKeyRingCollection = new PGPSecretKeyRingCollection(
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
             PGPSecretKeyRing keyRing = pgpSecretKeyRingCollection.getSecretKeyRing(keyId);
-            System.out.println("BEFORE: " + pgpSecretKeyRingCollection.size());
             if (checkIfSecretKeyRingWithIdExists(keyId, pgpSecretKeyRingCollection)) {
                 pgpSecretKeyRingCollection = PGPSecretKeyRingCollection.removeSecretKeyRing(pgpSecretKeyRingCollection, keyRing);
             }
-            System.out.println("AFTER: " + pgpSecretKeyRingCollection.size());
             if (pgpSecretKeyRingCollection.iterator().hasNext()) {
                 for (PGPSecretKey pk : pgpSecretKeyRingCollection.iterator().next()) {
-                    System.out.println("ID: " + pk.getKeyID());
                 }
             }
             byte myEncoded[] = pgpSecretKeyRingCollection.getEncoded();
@@ -149,13 +140,11 @@ public class KeyRingHelper {
     }
 
     public List<PGPSecretKey> getSecretKeyRingsFromFile() {
-//        System.out.println("getSecretKeyRingsFromFile()");
         ArrayList<PGPSecretKey> pgpSecretKeyList = new ArrayList<>();
         try (FileInputStream keyInputStream = new FileInputStream(SECRET_KEY_RING_COLLECTION_FILE_PATH)) {
             PGPSecretKeyRingCollection pgpSecCollection = new PGPSecretKeyRingCollection(
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator()
             );
-            System.out.println("collection size" + pgpSecCollection.size());
             Iterator keyRingIter = pgpSecCollection.getKeyRings();
             while (keyRingIter.hasNext()) {
                 PGPSecretKeyRing keyRing = (PGPSecretKeyRing) keyRingIter.next();
@@ -163,10 +152,8 @@ public class KeyRingHelper {
                 while (keyIter.hasNext()) {
                     PGPSecretKey key = (PGPSecretKey) keyIter.next();
                     pgpSecretKeyList.add(key);
-//                    System.out.println(key.getKeyID());
                 }
             }
-//            System.out.println(pgpSecretKeyList.size());
             return pgpSecretKeyList;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -263,8 +250,6 @@ public class KeyRingHelper {
             Iterator keyIter = keyRing.getSecretKeys();
             while (keyIter.hasNext()) {
                 PGPSecretKey key = (PGPSecretKey) keyIter.next();
-                System.out.println("READ INSIDE SECRET");
-                System.out.println("USERS: " + key.getUserIDs().next() + "KEYID" + key.getKeyID());
                 if (key.isSigningKey()) {
                     return key;
                 }
@@ -339,8 +324,6 @@ public class KeyRingHelper {
             PGPSecretKey sk = it.next();
             if (sk.getUserIDs().hasNext())
                 if (sk.getUserIDs().next().equals(userInfo)) {
-                    System.out.println("SIGN AS: " + sk.getUserIDs().next() + " ENCRYPT FOR: " + userInfo);
-                    System.out.println("SECRET KEY:" + sk.getKeyID());
                     return sk;
                 }
         }

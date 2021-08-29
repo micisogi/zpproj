@@ -199,7 +199,6 @@ public class mainGUI extends JFrame {
         for (User u : Utils.getInstance().users) {
             emails.add(u.getNameAndEmail());
         }
-//        System.out.println(emails.size());
         list.setModel(new DefaultComboBoxModel<String>(emails.toArray(new String[0])));
 
     }
@@ -215,19 +214,15 @@ public class mainGUI extends JFrame {
                 if (name.getText().isEmpty() || email.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Neispravno uneti podaci");
                 } else {
-                    System.out.println(Utils.getInstance().formatNameAndEmail(name.getText(), email.getText()));
                     DSAElGamalKeyRingGenerator dsael = new DSAElGamalKeyRingGenerator();
-                    System.out.println("DSA" + getSelectedButtonText(dsaButtonGroup));
                     Integer dsaSize = Integer.parseInt(getSelectedButtonText(dsaButtonGroup));
                     Integer elGamalSize = Integer.parseInt(getSelectedButtonText(elGamalButtonGroup));
                     String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
-                    System.out.println(passPhrase);
                     try {
                         dsael.generateDSAELGamalKeyRing(dsaSize, elGamalSize, name.getText(), email.getText(), passPhrase);
                         Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
                         setDropDownList(sendTo);
                         setDropDownList(from);
-//                        System.out.println(Utils.getInstance().getUsers().size());
 
                         Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
                     } catch (NoSuchProviderException e) {

@@ -1,26 +1,24 @@
 import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
-import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
-import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 import utils.KeyRingHelper;
-import utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
+import java.security.SecureRandom;
 import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 public class PGPMessage {
     private String message;
@@ -42,8 +40,7 @@ public class PGPMessage {
                       boolean conversion,
                       boolean des,
                       boolean idea,
-                      String passPhrase)
-    {
+                      String passPhrase) {
         this.message = message;
         this.from = from;
         this.sendTo = sendTo;
@@ -60,7 +57,7 @@ public class PGPMessage {
 
     }
 
-    public PGPPrivateKey getPrivateKey(){
+    public PGPPrivateKey getPrivateKey() {
         try {
             return privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
         } catch (IOException | PGPException e) {
@@ -69,11 +66,11 @@ public class PGPMessage {
         }
     }
 
-    public boolean verifyPassPhrase(){
+    public boolean verifyPassPhrase() {
         PGPPrivateKey pk = getPrivateKey();
-        if(pk == null) return false;
+        if (pk == null) return false;
         else {
-            System.out.println("VERIFIED SECRET KEY:" +pk.getKeyID());
+            System.out.println("VERIFIED SECRET KEY:" + pk.getKeyID());
             return true;
         }
     }
@@ -86,50 +83,53 @@ public class PGPMessage {
         this.chipertext = chipertext;
     }
 
-    public byte[] compress(String message) throws IOException{
+    public byte[] compress(String message) throws IOException {
         byte[] data = message.getBytes();
-        PGPCompressedDataGenerator compressGen = new PGPCompressedDataGenerator( PGPCompressedData.ZIP );
+        PGPCompressedDataGenerator compressGen = new PGPCompressedDataGenerator(PGPCompressedData.ZIP);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        OutputStream compressOut = compressGen.open( bos );
+        OutputStream compressOut = compressGen.open(bos);
         OutputStream os =
-                new PGPLiteralDataGenerator().open( compressOut, PGPLiteralData.BINARY, "", data.length, new Date() );
-        os.write( data );
+                new PGPLiteralDataGenerator().open(compressOut, PGPLiteralData.BINARY, "", data.length, new Date());
+        os.write(data);
         os.close();
         compressGen.close();
         return bos.toByteArray();
     }
 
-    public void authentication(String from, String sendTo, String alg){
+    public void authentication(String from, String sendTo, String alg) {
 
     }
 
-    public void privacy(String from, String sendTo, String alg){
+    public void privacy(String from, String sendTo, String alg) {
 
     }
 
-    public void compression(){
+    public void compression() {
 
     }
 
-    public void conversion(){
+    public void conversion() {
 
     }
 
 
 
     public void sendMessage() throws IOException, PGPException {
-        if(authentication){
+        if (authentication) {
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-            String messageSignature = signMessageByteArray(message, secretKey,from,passPhrase);
+            String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
 
             chipertext = messageSignature;
+        }
+        if (privacy) {
+//            PGPPublicKey publicKey = KeyRingHelper.getInstance().getPublicKey();
         }
     }
 
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
                                                String from,
-                                               String passPhrase) throws IOException,PGPException {
+                                               String passPhrase) throws IOException, PGPException {
 
         byte[] messageCharArray = message.getBytes();
         PGPPrivateKey privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
@@ -167,51 +167,70 @@ public class PGPMessage {
     }
 
     public static void verifyFile(
-            InputStream        in)
-            throws Exception
-    {
+            InputStream in)
+            throws Exception {
         in = PGPUtil.getDecoderStream(in);
 
         JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(in);
 
-        PGPCompressedData           c1 = (PGPCompressedData)pgpFact.nextObject();
+        PGPCompressedData c1 = (PGPCompressedData) pgpFact.nextObject();
 
         pgpFact = new JcaPGPObjectFactory(c1.getDataStream());
 
-        PGPOnePassSignatureList     p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
+        PGPOnePassSignatureList p1 = (PGPOnePassSignatureList) pgpFact.nextObject();
 
-        PGPOnePassSignature         ops = p1.get(0);
+        PGPOnePassSignature ops = p1.get(0);
 
-        PGPLiteralData              p2 = (PGPLiteralData)pgpFact.nextObject();
+        PGPLiteralData p2 = (PGPLiteralData) pgpFact.nextObject();
 
-        InputStream                 dIn = p2.getInputStream();
-        int                         ch;
+        InputStream dIn = p2.getInputStream();
+        int ch;
         KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
 
-        PGPPublicKey                key =    KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-        FileOutputStream            out = new FileOutputStream(p2.getFileName());
+        PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+        FileOutputStream out = new FileOutputStream(p2.getFileName());
 
         ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
 
-        while ((ch = dIn.read()) >= 0)
-        {
-            ops.update((byte)ch);
+        while ((ch = dIn.read()) >= 0) {
+            ops.update((byte) ch);
             out.write(ch);
         }
 
         out.close();
 
-        PGPSignatureList            p3 = (PGPSignatureList)pgpFact.nextObject();
+        PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
 
-        if (ops.verify(p3.get(0)))
-        {
+        if (ops.verify(p3.get(0))) {
             System.out.println("signature verified.");
-        }
-        else
-        {
+        } else {
             System.out.println("signature verification failed.");
         }
     }
+
+    public byte[] encryptMessageUsingSessionKey(String message, PGPPublicKey pgpPublicKey, int symetricAlgoritmCode) {
+        try {
+            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test")));
+            byte[] bytes = compress(message);
+            PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
+                    new JcePGPDataEncryptorBuilder(symetricAlgoritmCode).setWithIntegrityPacket(true).setSecureRandom(new SecureRandom()).setProvider("BC"));
+            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
+            OutputStream cOut = encGen.open(out, bytes.length);
+
+            cOut.write(bytes);
+            cOut.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (PGPException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+//    public byte[] decryptMessage(byte[] message,PGPPrivateKey pgpPrivateKey){
+//
+//    }
 
 
 
