@@ -12,9 +12,11 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
+import org.bouncycastle.util.Strings;
 import utils.KeyRingHelper;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Date;
@@ -55,6 +57,7 @@ public class PGPMessage {
         this.des = des;
         this.idea = idea;
         this.passPhrase = passPhrase;
+        this.symmetricKeyAlgorithm = symetricKeyAlgorithm;
 
         userSendTo = User.getInfoFromUser(sendTo.toString());
 
@@ -132,18 +135,24 @@ public class PGPMessage {
      * @throws PGPException
      */
     public void sendMessage() throws IOException, PGPException {
+        System.out.println("ID FOR ENCRYPTION: ");
         if (authentication) {
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
             String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
 
             chipertext = messageSignature;
         }
+        System.out.println("PRIVACY"+privacy);
         if (privacy) {
+            System.out.println("ID FOR ENCRYPTION33333333: ");
             PGPPublicKey publicKey = KeyRingHelper.getInstance().getPublicKey(Long.parseLong(sendTo,16));
-            symmetricKeyAlgorithm = idea? SymmetricKeyAlgorithmTags.IDEA : SymmetricKeyAlgorithmTags.TRIPLE_DES;
+//            symmetricKeyAlgorithm = idea? SymmetricKeyAlgorithmTags.IDEA : SymmetricKeyAlgorithmTags.TRIPLE_DES;
             System.out.println("ID FOR ENCRYPTION: "+publicKey.getKeyID());
 
-            chipertext = createEncryptedData(publicKey,message,symmetricKeyAlgorithm);
+
+            byte[] ch= encryptMessageUsingSessionKey(message,publicKey,symmetricKeyAlgorithm);
+//             createEncryptedData(publicKey,message.getBytes());
+//            chipertext = msg;
 //            String encryptedMessage = null;
 //            encryptedMessage = encryptByteArray(message.getBytes(), publicKey);
 
@@ -263,8 +272,10 @@ public class PGPMessage {
      */
     public byte[] encryptMessageUsingSessionKey(String message, PGPPublicKey pgpPublicKey, int symetricAlgoritmCode) {
         try {
-            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test")));
+            System.out.println("usao");
+            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test.txt")));
             byte[] bytes = compress(message);
+
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
                     new JcePGPDataEncryptorBuilder(symetricAlgoritmCode).setWithIntegrityPacket(true).setSecureRandom(new SecureRandom()).setProvider("BC"));
             encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
@@ -272,6 +283,7 @@ public class PGPMessage {
 
             cOut.write(bytes);
             cOut.close();
+            out.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -281,31 +293,68 @@ public class PGPMessage {
         return null;
     }
 
-    public static String createEncryptedData(
-            PGPPublicKey encryptionKey,
-            byte[] data, int symmetricKeyAlgorithm)
-            throws PGPException, IOException
-    {
-        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
-                new JcePGPDataEncryptorBuilder(symmetricKeyAlgorithm)
-                        .setWithIntegrityPacket(true)
-                        .setSecureRandom(new SecureRandom()).setProvider("BC"));
-        encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(encryptionKey).setProvider("BC"));
+//    public static String createEncryptedData(
+//            PGPPublicKey encryptionKey,
+//            byte[] data, int symmetricKeyAlgorithm)
+//            throws PGPException, IOException
+//    {
+//
+//        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
+//                new JcePGPDataEncryptorBuilder(symmetricKeyAlgorithm)
+//                        .setWithIntegrityPacket(true)
+//                        .setSecureRandom(new SecureRandom()).setProvider("BC"));
+//        encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(encryptionKey).setProvider("BC"));
+//
+//        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+//        // create an indefinite length encrypted stream
+//        OutputStream out = encGen.open(encOut, new byte[4096]);
+//        // write out the literal data
+//        PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
+//        OutputStream pOut = lData.open(
+//                out, PGPLiteralData.BINARY,
+//                PGPLiteralData.CONSOLE, data.length, new Date());
+//
+//        pOut.write(data);
+//        pOut.close();
+//        // finish the encryption
+//        out.close();
+//        return Strings.fromByteArray(encOut.toByteArray());
+//    }
+//    public static byte[] createEncryptedData(
+//        PGPPublicKey encryptionKey,
+//        byte[] data)
+//        throws PGPException, IOException
+//    {
+//        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
+//                new JcePGPDataEncryptorBuilder(SymmetricKeyAlgorithmTags.)
+//                        .setWithIntegrityPacket(true)
+//                        .setSecureRandom(new SecureRandom()).setProvider("BC"));
+//        encGen.addMethod(
+//                new JcePublicKeyKeyEncryptionMethodGenerator(encryptionKey)
+//                        .setProvider("BC"));
+//        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+//        // create an indefinite length encrypted stream
+//        OutputStream cOut = encGen.open(encOut, new byte[4096]);
+//        // write out the literal data
+//        PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
+//        OutputStream pOut = lData.open(
+//                cOut, PGPLiteralData.BINARY,
+//                PGPLiteralData.CONSOLE, data.length, new Date());
+//        pOut.write(data);
+//        pOut.close();
+//        // finish the encryption
+//        cOut.close();
+//        byte[] b=encOut.toByteArray();
+//        System.out.println(Strings.fromByteArray(b));
+//        return encOut.toByteArray();
+//    }
 
-        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
-        // create an indefinite length encrypted stream
-        OutputStream out = encGen.open(encOut, new byte[4096]);
-        out = new ArmoredOutputStream(out);
-        // write out the literal data
+    private static void writeBytesToLiteralData(OutputStream out,
+                                                char fileType, String name, byte[] bytes) throws IOException {
         PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
-        OutputStream pOut = lData.open(
-                out, PGPLiteralData.BINARY,
-                PGPLiteralData.CONSOLE, data.length, new Date());
-        pOut.write(data);
-        pOut.close();
-        // finish the encryption
-        out.close();
-        return encOut.toString();
+//        OutputStream pOut = new ArmoredOutputStream(pO)
+        OutputStream pOut = lData.open(out, fileType, name,bytes.length, new Date());
+        pOut.write(bytes);
     }
 
 }
