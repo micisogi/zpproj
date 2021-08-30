@@ -272,7 +272,6 @@ public class PGPMessage {
      * @return
      */
     public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode) {
-        System.out.println("usao");
         try {
 
             OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test.txt")));
