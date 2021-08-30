@@ -180,16 +180,6 @@ public class mainGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-
-                try {
-                    FileInputStream txt = new FileInputStream("test.txt");
-                    FileInputStream dat = new FileInputStream("sckc.dat");
-                    PGPMessage.decryptFile(txt,"kale".toCharArray(),"out.txt");
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                } catch (NoSuchProviderException ex) {
-                    ex.printStackTrace();
-                }
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
                 int result = fileChooser.showOpenDialog(mainPanel);
@@ -435,6 +425,11 @@ public class mainGUI extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
                 int symAlg = 2;
+                if (!privacyCheckBox.isSelected() && !authenticationCheckBox.isSelected()
+                && !compressionCheckBox.isSelected() && !conversionCheckBox.isSelected()){
+                    JOptionPane.showMessageDialog(null, "Morate izabrati neku akciju");
+                    return;
+                }
                 if (privacyCheckBox.isSelected()) {
                     String alg = getSelectedButtonText(symetricButtonGroup);
                     switch (alg) {
@@ -448,15 +443,12 @@ public class mainGUI extends JFrame {
                         }
                     }
                 }
-//                if(message.getText().isEmpty()) {
-//                    JOptionPane.showMessageDialog(null, "Unesite tekst u polje za slanje.");
-//                    return;
-//                }
-                if (from.getSelectedItem() == null) {
+
+                if (privacyCheckBox.isSelected() && sendTo.isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
-                if (sendTo.isSelectionEmpty() == true) {
+                if (!privacyCheckBox.isSelected() && sendTo.isSelectionEmpty() == true) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
