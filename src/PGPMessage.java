@@ -21,6 +21,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A class used to generate a PGPMessage
@@ -28,7 +29,7 @@ import java.util.Iterator;
 public class PGPMessage {
     private String message;
     long from;
-    String sendTo;
+    List<Long> sendTo;
     private boolean authentication, privacy, compression, conversion, des, idea;
     private String chipertext;
     User userSendTo;
@@ -38,7 +39,7 @@ public class PGPMessage {
 
     public PGPMessage(String message,
                       long from,
-                      String sendTo,
+                      List<Long> sendTo,
                       boolean authentication,
                       boolean privacy,
                       boolean compression,
@@ -65,6 +66,7 @@ public class PGPMessage {
 
     /**
      * A helper function used to get the secret key
+     *
      * @return
      */
     public PGPPrivateKey getPrivateKey() {
@@ -78,6 +80,7 @@ public class PGPMessage {
 
     /**
      * Function used to verify the passphrase entered for the secret key
+     *
      * @return
      */
     public boolean verifyPassPhrase() {
@@ -99,6 +102,7 @@ public class PGPMessage {
 
     /**
      * A function used to compress a message
+     *
      * @param message
      * @return
      * @throws IOException
@@ -131,26 +135,20 @@ public class PGPMessage {
 
     /**
      * A function used to generate and save a message into a file
+     *
      * @throws IOException
      * @throws PGPException
      */
     public void sendMessage() throws IOException, PGPException {
-        System.out.println("ID FOR ENCRYPTION: ");
         if (authentication) {
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
             String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
 
             chipertext = messageSignature;
         }
-        System.out.println("PRIVACY"+privacy);
         if (privacy) {
-            System.out.println("ID FOR ENCRYPTION33333333: ");
-            PGPPublicKey publicKey = KeyRingHelper.getInstance().getPublicKey(Long.parseLong(sendTo,16));
-//            symmetricKeyAlgorithm = idea? SymmetricKeyAlgorithmTags.IDEA : SymmetricKeyAlgorithmTags.TRIPLE_DES;
-            System.out.println("ID FOR ENCRYPTION: "+publicKey.getKeyID());
 
-
-            byte[] ch= encryptMessageUsingSessionKey(message,publicKey,symmetricKeyAlgorithm);
+            byte[] ch = encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm);
 //             createEncryptedData(publicKey,message.getBytes());
 //            chipertext = msg;
 //            String encryptedMessage = null;
@@ -161,6 +159,7 @@ public class PGPMessage {
 
     /**
      * Function used to sign a message with a secret key
+     *
      * @param message
      * @param secretKey
      * @param from
@@ -211,6 +210,7 @@ public class PGPMessage {
 
     /**
      * Function used to verify an OpenPGP file
+     *
      * @param in
      * @return
      * @throws Exception
@@ -265,20 +265,24 @@ public class PGPMessage {
 
     /**
      * Function used to encrypt a message using a session key generated in it
+     *
      * @param message
-     * @param pgpPublicKey
+     * @param pgpPublicKeyList
      * @param symetricAlgoritmCode
      * @return
      */
-    public byte[] encryptMessageUsingSessionKey(String message, PGPPublicKey pgpPublicKey, int symetricAlgoritmCode) {
+    public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode) {
+        System.out.println("usao");
         try {
-            System.out.println("usao");
+
             OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test.txt")));
             byte[] bytes = compress(message);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
                     new JcePGPDataEncryptorBuilder(symetricAlgoritmCode).setWithIntegrityPacket(true).setSecureRandom(new SecureRandom()).setProvider("BC"));
-            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
+            pgpPublicKeyList.forEach(pgpPublicKey -> {
+                encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
+            });
             OutputStream cOut = encGen.open(out, bytes.length);
 
             cOut.write(bytes);
@@ -353,7 +357,7 @@ public class PGPMessage {
                                                 char fileType, String name, byte[] bytes) throws IOException {
         PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
 //        OutputStream pOut = new ArmoredOutputStream(pO)
-        OutputStream pOut = lData.open(out, fileType, name,bytes.length, new Date());
+        OutputStream pOut = lData.open(out, fileType, name, bytes.length, new Date());
         pOut.write(bytes);
     }
 
