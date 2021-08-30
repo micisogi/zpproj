@@ -133,6 +133,7 @@ public class PGPMessage {
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
+        writeToFile(filepath,messageSignature);
         Path path = Paths.get("test");
         Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(messageSignature)));
 //        chipherText = ;
@@ -310,4 +311,14 @@ public class PGPMessage {
             throw new IllegalStateException("could not read file " + file, e);
         }
     }
+
+    private static void writeToFile(String filepath, String message){
+        try{
+            FileWriter fw=new FileWriter(filepath);
+            fw.write(message);
+            fw.close();
+        }catch(Exception e){System.out.println(e);}
+//        System.out.println("Success...");
+    }
+
 }

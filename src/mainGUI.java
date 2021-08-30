@@ -481,16 +481,16 @@ public class mainGUI extends JFrame {
                 try {
                     pgpmsg.setFilepath(getFilePath());
                     pgpmsg.sendMessage();
-//                    FileReader reader = new FileReader(pgpmsg.getFilepath());
-//                    BufferedReader br = new BufferedReader(reader);
-//                    chiphertext.read( br, null );
-//                    br.close();
-//                    chiphertext.requestFocus();
-                    chiphertext.setText(pgpmsg.getChipherText());
+                    FileReader reader = new FileReader(pgpmsg.getFilepath());
+                    BufferedReader br = new BufferedReader(reader);
+                    chiphertext.read( br, null );
+                    br.close();
+                    chiphertext.requestFocus();
+//                    chiphertext.setText(pgpmsg.getChipherText());
 //                    byte[] msgByte = pgpmsg.getChiphertextInBytes();
 //                    saveMessageByte(msgByte);
 //                    chiphertext.setText(pgpmsg.getChipertext());
-                    saveMessage(chiphertext.getText());
+//                    saveMessage(chiphertext.getText());
 
                 } catch (IOException | PGPException e) {
                     e.printStackTrace();
