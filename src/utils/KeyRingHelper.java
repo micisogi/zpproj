@@ -285,6 +285,7 @@ public class KeyRingHelper {
      * @throws PGPException
      */
     public PGPSecretKey readSecretKey(String fileName) throws IOException, PGPException {
+        System.out.println("BOBAN SAULIC");
         InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
         PGPSecretKey secKey = readSecretKey(keyIn);
         keyIn.close();

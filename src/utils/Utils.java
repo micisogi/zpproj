@@ -69,6 +69,7 @@ public class Utils {
      */
     public static void refreshTable(DefaultTableModel model) {
         try {
+            model.setRowCount(0);
             Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
             Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
         } catch (IOException e) {
@@ -137,7 +138,6 @@ public class Utils {
                             break;
                         }
                     }
-
                 }
                 Object o[] = new Object[columnNames.length];
                 o[0] = u.getName();
