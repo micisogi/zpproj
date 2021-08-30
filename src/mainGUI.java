@@ -170,6 +170,17 @@ public class mainGUI extends JFrame {
         receive.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
+
+                try {
+                    FileInputStream txt = new FileInputStream("test.txt");
+                    FileInputStream dat = new FileInputStream("sckc.dat");
+                    PGPMessage.decryptFile(txt,dat,"kale".toCharArray(),"out.txt");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (NoSuchProviderException ex) {
+                    ex.printStackTrace();
+                }
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
                 int result = fileChooser.showOpenDialog(mainPanel);
@@ -178,13 +189,13 @@ public class mainGUI extends JFrame {
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
                         FileInputStream fis = new FileInputStream(absolutePath);
-                        if (PGPMessage.verifyFile(fis)) {
-                            JOptionPane.showMessageDialog(null, "Signature is valid.");
-                            return;
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Signature verification failed.");
-                            return;
-                        }
+//                        if (PGPMessage.verifyFile(fis)) {
+//                            JOptionPane.showMessageDialog(null, "Signature is valid.");
+//                            return;
+//                        } else {
+//                            JOptionPane.showMessageDialog(null, "Signature verification failed.");
+//                            return;
+//                        }
                     } catch (FileNotFoundException fileNotFoundException) {
                         fileNotFoundException.printStackTrace();
                     } catch (Exception exception) {
