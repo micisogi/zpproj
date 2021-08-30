@@ -16,9 +16,7 @@ import utils.KeyRingHelper;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -121,9 +119,10 @@ public class PGPMessage {
         return bos.toByteArray();
     }
 
-    public void authentication() throws IOException, PGPException {
+    public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
+        signFile(message,secretKey,passPhrase);
 
     }
 
@@ -143,7 +142,7 @@ public class PGPMessage {
      * @throws IOException
      * @throws PGPException
      */
-    public void sendMessage() throws IOException, PGPException {
+    public void sendMessage() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         if (authentication) {
             authentication();
         }
@@ -290,10 +289,43 @@ public class PGPMessage {
         return null;
     }
 
-//    private void readFromFile() throws IOException {
-//        FileReader reader = new FileReader( filepath);
-//        BufferedReader br = new BufferedReader(reader);
-//        edit.read( br, null );
-//        br.close();
-//    }
+    private void signFile(String message, PGPSecretKey secretKey,
+                                 String passPhrase)
+            throws IOException, NoSuchAlgorithmException, NoSuchProviderException, PGPException, SignatureException
+    {
+        OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
+        byte[] bytes = compress(message);
+
+        PGPPrivateKey pgpPrivKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
+        sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
+
+        Iterator it = secretKey.getPublicKey().getUserIDs();
+        if (it.hasNext()) {
+            PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
+            spGen.setSignerUserID(false, (String)it.next());
+            sGen.setHashedSubpackets(spGen.generate());
+        }
+
+        PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator( PGPCompressedData.ZLIB);
+        BCPGOutputStream bOut = new BCPGOutputStream(cGen.open(out));
+        sGen.generateOnePassVersion(false).encode(bOut);
+
+        File file = new File(filepath);
+        PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
+        OutputStream lOut = lGen.open(bOut, PGPLiteralData.BINARY, file);
+        FileInputStream fIn = new FileInputStream(file);
+        int ch;
+
+        while ((ch = fIn.read()) >= 0) {
+            lOut.write(ch);
+            sGen.update((byte)ch);
+        }
+
+        lGen.close();
+        sGen.generate().encode(bOut);
+        cGen.close();
+        out.close();
+
+    }
 }
