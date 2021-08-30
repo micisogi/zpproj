@@ -5,8 +5,11 @@ import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
+import javax.swing.*;
 import java.io.*;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -427,10 +430,9 @@ public class KeyRingHelper {
      *
      * @param userId
      * @return
-     * @throws IOException
      */
-    public PGPSecretKey getSecretKey(long userId) throws IOException {
-        List<PGPSecretKey> secretKeyRing = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
+    public PGPSecretKey getSecretKey(long userId) {
+        List<PGPSecretKey> secretKeyRing = getSecretKeyRingsFromFile();
         for (Iterator<PGPSecretKey> it = secretKeyRing.iterator(); it.hasNext(); ) {
             PGPSecretKey sk = it.next();
             if (sk.getKeyID() == userId) {
@@ -455,6 +457,22 @@ public class KeyRingHelper {
         PBESecretKeyDecryptor decryptor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase.toCharArray());
         return secret.extractPrivateKey(decryptor);
 
+    }
+
+    public PGPPrivateKey getPrivateKey(long userId, char[] ch) {
+
+        PGPSecretKey secret = getSecretKey(userId);
+        PGPPrivateKey sk;
+        if (secret == null) {
+            return null;
+        }
+        try {
+            sk = secret.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(ch));
+            return sk;
+        } catch (PGPException e) {
+            String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+            return getPrivateKey(userId, passPhrase.toCharArray());
+        }
     }
 
     /**
@@ -497,6 +515,4 @@ public class KeyRingHelper {
             return returnList;
         }
     }
-
-
 }

@@ -184,7 +184,8 @@ public class mainGUI extends JFrame {
                     File selectedFile = fileChooser.getSelectedFile();
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
-                        FileInputStream fis = new FileInputStream(absolutePath);
+                        InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
+                        PGPMessage.decrypt(in, mainPanel);
 //                        if (PGPMessage.verifyFile(fis)) {
 //                            JOptionPane.showMessageDialog(null, "Signature is valid.");
 //                            return;
@@ -193,9 +194,7 @@ public class mainGUI extends JFrame {
 //                            return;
 //                        }
                     } catch (FileNotFoundException fileNotFoundException) {
-                        fileNotFoundException.printStackTrace();
                     } catch (Exception exception) {
-                        exception.printStackTrace();
                     }
                 }
             }
@@ -423,7 +422,7 @@ public class mainGUI extends JFrame {
             public void actionPerformed(ActionEvent a) {
                 int symAlg = 2;
                 if (!privacyCheckBox.isSelected() && !authenticationCheckBox.isSelected()
-                && !compressionCheckBox.isSelected() && !conversionCheckBox.isSelected()){
+                        && !compressionCheckBox.isSelected() && !conversionCheckBox.isSelected()) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati neku akciju");
                     return;
                 }
@@ -483,7 +482,7 @@ public class mainGUI extends JFrame {
                     pgpmsg.sendMessage();
                     FileReader reader = new FileReader(pgpmsg.getFilepath());
                     BufferedReader br = new BufferedReader(reader);
-                    chiphertext.read( br, null );
+                    chiphertext.read(br, null);
                     br.close();
                     chiphertext.requestFocus();
 //                    chiphertext.setText(pgpmsg.getChipherText());
@@ -524,11 +523,9 @@ public class mainGUI extends JFrame {
 
     /**
      * function used to save a  OpenPGP message into a text file
-     *
-     *
      */
 
-    public String getFilePath(){
+    public String getFilePath() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
@@ -543,6 +540,7 @@ public class mainGUI extends JFrame {
         }
         return null;
     }
+
     public void saveMessage(String chipertex) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
