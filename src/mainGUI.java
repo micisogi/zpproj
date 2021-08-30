@@ -481,16 +481,16 @@ public class mainGUI extends JFrame {
                 try {
                     pgpmsg.setFilepath(getFilePath());
                     pgpmsg.sendMessage();
-                    FileReader reader = new FileReader(pgpmsg.getFilepath());
-                    BufferedReader br = new BufferedReader(reader);
-                    chiphertext.read( br, null );
-                    br.close();
-                    chiphertext.requestFocus();
-//                    chiphertext.setText(pgpmsg.getChipertext().toString());
+//                    FileReader reader = new FileReader(pgpmsg.getFilepath());
+//                    BufferedReader br = new BufferedReader(reader);
+//                    chiphertext.read( br, null );
+//                    br.close();
+//                    chiphertext.requestFocus();
+                    chiphertext.setText(pgpmsg.getChipherText());
 //                    byte[] msgByte = pgpmsg.getChiphertextInBytes();
 //                    saveMessageByte(msgByte);
 //                    chiphertext.setText(pgpmsg.getChipertext());
-//                    saveMessage(chiphertext.getText());
+                    saveMessage(chiphertext.getText());
 
                 } catch (IOException | PGPException e) {
                     e.printStackTrace();
@@ -525,7 +525,7 @@ public class mainGUI extends JFrame {
     /**
      * function used to save a  OpenPGP message into a text file
      *
-     * @param chipertex
+     *
      */
 
     public String getFilePath(){

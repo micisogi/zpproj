@@ -4,6 +4,7 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.jcajce.provider.symmetric.IDEA;
+import org.bouncycastle.jcajce.provider.symmetric.XSalsa20;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
@@ -16,7 +17,11 @@ import utils.KeyRingHelper;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.*;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +39,12 @@ public class PGPMessage {
     PGPPrivateKey privateKey;
     int symmetricKeyAlgorithm;
     String filepath;
+
+    public String getChipherText() {
+        return chipherText;
+    }
+
+    String chipherText;
 
 
     public PGPMessage(String message,
@@ -122,7 +133,10 @@ public class PGPMessage {
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
-        signFile(message,secretKey,passPhrase);
+        Path path = Paths.get("test");
+        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(messageSignature)));
+//        chipherText = ;
+
 
     }
 
@@ -280,7 +294,6 @@ public class PGPMessage {
             cOut.write(bytes);
             cOut.close();
             out.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (PGPException e) {
@@ -289,43 +302,12 @@ public class PGPMessage {
         return null;
     }
 
-    private void signFile(String message, PGPSecretKey secretKey,
-                                 String passPhrase)
-            throws IOException, NoSuchAlgorithmException, NoSuchProviderException, PGPException, SignatureException
-    {
-        OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
-        byte[] bytes = compress(message);
-
-        PGPPrivateKey pgpPrivKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
-        sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
-
-        Iterator it = secretKey.getPublicKey().getUserIDs();
-        if (it.hasNext()) {
-            PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
-            spGen.setSignerUserID(false, (String)it.next());
-            sGen.setHashedSubpackets(spGen.generate());
+    private static String encodeFileToBase64(File file) {
+        try {
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            return Base64.getEncoder().encodeToString(fileContent);
+        } catch (IOException e) {
+            throw new IllegalStateException("could not read file " + file, e);
         }
-
-        PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator( PGPCompressedData.ZLIB);
-        BCPGOutputStream bOut = new BCPGOutputStream(cGen.open(out));
-        sGen.generateOnePassVersion(false).encode(bOut);
-
-        File file = new File(filepath);
-        PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
-        OutputStream lOut = lGen.open(bOut, PGPLiteralData.BINARY, file);
-        FileInputStream fIn = new FileInputStream(file);
-        int ch;
-
-        while ((ch = fIn.read()) >= 0) {
-            lOut.write(ch);
-            sGen.update((byte)ch);
-        }
-
-        lGen.close();
-        sGen.generate().encode(bOut);
-        cGen.close();
-        out.close();
-
     }
 }
