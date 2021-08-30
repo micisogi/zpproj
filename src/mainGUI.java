@@ -482,9 +482,18 @@ public class mainGUI extends JFrame {
                 }
 
                 try {
+                    pgpmsg.setFilepath(getFilePath());
                     pgpmsg.sendMessage();
-                    chiphertext.setText(pgpmsg.getChipertext());
-                    saveMessage(chiphertext.getText());
+                    FileReader reader = new FileReader(pgpmsg.getFilepath());
+                    BufferedReader br = new BufferedReader(reader);
+                    chiphertext.read( br, null );
+                    br.close();
+                    chiphertext.requestFocus();
+//                    chiphertext.setText(pgpmsg.getChipertext().toString());
+//                    byte[] msgByte = pgpmsg.getChiphertextInBytes();
+//                    saveMessageByte(msgByte);
+//                    chiphertext.setText(pgpmsg.getChipertext());
+//                    saveMessage(chiphertext.getText());
 
                 } catch (IOException | PGPException e) {
                     e.printStackTrace();
@@ -515,6 +524,22 @@ public class mainGUI extends JFrame {
      *
      * @param chipertex
      */
+
+    public String getFilePath(){
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
+        int result = fileChooser.showOpenDialog(mainPanel);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String absolutePath = selectedFile.getAbsolutePath();
+            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
+                absolutePath += ".txt";
+
+            return absolutePath;
+        }
+        return null;
+    }
     public void saveMessage(String chipertex) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -536,7 +561,6 @@ public class mainGUI extends JFrame {
             }
         }
     }
-
 
     private List<Long> getSelectedListItems(JList<SendToModel> list) {
         ArrayList<Long> returnList = new ArrayList<>();
