@@ -184,7 +184,8 @@ public class mainGUI extends JFrame {
                     File selectedFile = fileChooser.getSelectedFile();
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
-                        FileInputStream fis = new FileInputStream(absolutePath);
+                        InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
+                        PGPMessage.decrypt(in);
 //                        if (PGPMessage.verifyFile(fis)) {
 //                            JOptionPane.showMessageDialog(null, "Signature is valid.");
 //                            return;

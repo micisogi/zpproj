@@ -3,11 +3,13 @@ import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.examples.PGPExampleUtil;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.*;
 import org.bouncycastle.util.Strings;
 import utils.KeyRingHelper;
 
+import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -303,5 +305,37 @@ public class PGPMessage {
         } catch (IOException e) {
             throw new IllegalStateException("could not read file " + file, e);
         }
+    }
+
+    public static void decrypt(InputStream in) throws IOException {
+        in = PGPUtil.getDecoderStream(in);
+        try {
+            JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
+            PGPEncryptedDataList enc;
+            Object                  o = pgpF.nextObject();
+            //
+            // the first object might be a PGP marker packet.
+            //
+            if (o instanceof PGPEncryptedDataList)
+            {
+                enc = (PGPEncryptedDataList)o;
+            }
+            else
+            {
+                enc = (PGPEncryptedDataList)pgpF.nextObject();
+            }
+            Iterator                    it = enc.getEncryptedDataObjects();
+            PGPPrivateKey               sKey = null;
+            PGPPublicKeyEncryptedData   pbe = null;
+
+            while (sKey == null && it.hasNext())
+            {
+                pbe = (PGPPublicKeyEncryptedData)it.next();
+                sKey = KeyRingHelper.getInstance().getPrivateKey(pbe.getKeyID());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
     }
 }
