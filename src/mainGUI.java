@@ -140,7 +140,6 @@ public class mainGUI extends JFrame {
                     }
                 }
             });
-            System.out.println(myModel.size());
             sendTo.setModel(myModel);
         } catch (IOException e) {
             e.printStackTrace();
