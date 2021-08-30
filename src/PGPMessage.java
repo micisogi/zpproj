@@ -123,7 +123,7 @@ public class PGPMessage {
 
     public void authentication() throws IOException, PGPException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-        String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
+        String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
 
     }
 
