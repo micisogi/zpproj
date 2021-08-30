@@ -131,11 +131,12 @@ public class PGPMessage {
     }
 
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
+        System.out.println("Usao sam autentikacija");
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         message = signMessageByteArray(message, secretKey, passPhrase);
         writeToFile(filepath,message);
         Path path = Paths.get("test");
-        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(message)));
+//        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(message)));
     }
 
     public void authenticationAndPrivacy() throws IOException, PGPException {
@@ -161,14 +162,19 @@ public class PGPMessage {
      * @throws PGPException
      */
     public void sendMessage() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
-        if (authentication) {
+        if (authentication && !privacy) {
             authentication();
         }
-        if (privacy) {
+        if (privacy && !authentication) {
             privacy();
         }
         if(authentication && privacy){
             authenticationAndPrivacy();
+        }
+        if(compression){
+            String str = readFromFileIntoString(filepath);
+            byte[] bytes = compress(str);
+//            writeToFile();
         }
 
     }
@@ -186,7 +192,7 @@ public class PGPMessage {
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
                                                String passPhrase) throws IOException, PGPException {
-
+        System.out.println("usaoi u auth");
         byte[] messageCharArray = message.getBytes();
         PGPPrivateKey privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
         PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
@@ -202,8 +208,7 @@ public class PGPMessage {
             spGen.addSignerUserID(false, (String) it.next());
             signatureGenerator.setHashedSubpackets(spGen.generate());
         }
-        PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(PGPCompressedData.ZLIB);
-        BCPGOutputStream bOut = new BCPGOutputStream(cGen.open(out));
+        BCPGOutputStream bOut = new BCPGOutputStream(out);
         signatureGenerator.generateOnePassVersion(false).encode(bOut);
 
         PGPLiteralDataGenerator lGen = new PGPLiteralDataGenerator();
@@ -216,7 +221,6 @@ public class PGPMessage {
 
         lGen.close();
         signatureGenerator.generate().encode(bOut);
-        cGen.close();
         out.close();
 
         return encOut.toString();
@@ -287,7 +291,7 @@ public class PGPMessage {
      */
     public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode, String filepath) {
         try {
-
+        System.out.println("Usao sam ekripcija");
             OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
             byte[] bytes = compress(message);
 
@@ -327,6 +331,20 @@ public class PGPMessage {
 //        System.out.println("Success...");
     }
 
+    private static String readFromFileIntoString(String filePath) {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+
+            String sCurrentLine;
+            while ((sCurrentLine = br.readLine()) != null) {
+                contentBuilder.append(sCurrentLine).append("\n");
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contentBuilder.toString();
+    }
 //    public String encryptByteArray(byte[] clearData, List<PGPPublicKey> pgpPublicKeyList)
 //            throws IOException, PGPException, NoSuchProviderException {
 //
