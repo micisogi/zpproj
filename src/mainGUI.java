@@ -133,10 +133,9 @@ public class mainGUI extends JFrame {
             sendTo.setSelectionModel(new DefaultListSelectionModel() {
                 @Override
                 public void setSelectionInterval(int index0, int index1) {
-                    if(super.isSelectedIndex(index0)) {
+                    if (super.isSelectedIndex(index0)) {
                         super.removeSelectionInterval(index0, index1);
-                    }
-                    else {
+                    } else {
                         super.addSelectionInterval(index0, index1);
                     }
                 }
@@ -292,14 +291,11 @@ public class mainGUI extends JFrame {
                     File selectedFile = fileChooser.getSelectedFile();
                     try {
                         KeyRingHelper.getInstance().readPublicKey(selectedFile.getAbsolutePath());
-                        Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (PGPException e) {
                         try {
                             KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
-                            Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         } catch (PGPException pgpException) {
@@ -308,7 +304,8 @@ public class mainGUI extends JFrame {
                         e.printStackTrace();
                     }
                 }
-
+                Utils.refreshTable(model);
+                initDropDowns();
 
             }
         });

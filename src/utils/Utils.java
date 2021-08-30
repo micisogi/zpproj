@@ -69,6 +69,7 @@ public class Utils {
      */
     public static void refreshTable(DefaultTableModel model) {
         try {
+            model.setRowCount(0);
             Utils.getInstance().pgpSecretKeyListToObject(KeyRingHelper.getInstance().getSecretKeyRingsFromFile(), model);
             Utils.getInstance().pgpPublicKeyListToObject(KeyRingHelper.getInstance().getPublicKeyRingsFromFile(), model);
         } catch (IOException e) {
@@ -114,6 +115,7 @@ public class Utils {
      * @param model
      */
     public void pgpPublicKeyListToObject(List<PGPPublicKey> list, DefaultTableModel model) {
+        System.out.println("pgpPublicKeyListToObject CALLED");
         SimpleDateFormat sdf = new SimpleDateFormat("dd-mm-yyyy");
         for (PGPPublicKey ppk : list
         ) {
@@ -128,6 +130,7 @@ public class Utils {
                 o[4] = ppk.getAlgorithm() == 17 ? "DSA" : "ElGamal";
                 o[5] = "PUBLIC";
                 model.addRow(o);
+                System.out.println("ADDING ROW INSIDE IF");
             } else {
                 User u = new User("");
                 for (User k : users) {
@@ -137,7 +140,6 @@ public class Utils {
                             break;
                         }
                     }
-
                 }
                 Object o[] = new Object[columnNames.length];
                 o[0] = u.getName();
@@ -146,6 +148,7 @@ public class Utils {
                 o[3] = Long.toHexString(ppk.getKeyID());
                 o[4] = ppk.getAlgorithm() == 17 ? "DSA" : "ElGamal";
                 o[5] = "PUBLIC";
+                System.out.println("ADDING ROW INSIDE ELSE");
                 model.addRow(o);
             }
 
