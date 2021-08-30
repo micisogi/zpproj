@@ -4,6 +4,7 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.*;
 import org.bouncycastle.jcajce.provider.symmetric.IDEA;
+import org.bouncycastle.jcajce.provider.symmetric.XSalsa20;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
@@ -16,9 +17,13 @@ import utils.KeyRingHelper;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +41,12 @@ public class PGPMessage {
     PGPPrivateKey privateKey;
     int symmetricKeyAlgorithm;
     String filepath;
+
+    public String getChipherText() {
+        return chipherText;
+    }
+
+    String chipherText;
 
 
     public PGPMessage(String message,
@@ -124,6 +135,10 @@ public class PGPMessage {
     public void authentication() throws IOException, PGPException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
+        Path path = Paths.get("test");
+        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(messageSignature)));
+//        chipherText = ;
+
 
     }
 
@@ -267,8 +282,10 @@ public class PGPMessage {
      */
     public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode, String filepath) {
         try {
+            ByteArrayOutputStream encOut = new ByteArrayOutputStream();
 
-            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
+            OutputStream out = encOut;
+            out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
             byte[] bytes = compress(message);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
@@ -276,12 +293,11 @@ public class PGPMessage {
             pgpPublicKeyList.forEach(pgpPublicKey -> {
                 encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
             });
-            OutputStream cOut = encGen.open(out, bytes.length);
+            ByteArrayOutputStream cOut = (ByteArrayOutputStream) encGen.open(out, bytes.length);
 
             cOut.write(bytes);
             cOut.close();
             out.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (PGPException e) {
@@ -290,10 +306,12 @@ public class PGPMessage {
         return null;
     }
 
-//    private void readFromFile() throws IOException {
-//        FileReader reader = new FileReader( filepath);
-//        BufferedReader br = new BufferedReader(reader);
-//        edit.read( br, null );
-//        br.close();
-//    }
+    private static String encodeFileToBase64(File file) {
+        try {
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            return Base64.getEncoder().encodeToString(fileContent);
+        } catch (IOException e) {
+            throw new IllegalStateException("could not read file " + file, e);
+        }
+    }
 }
