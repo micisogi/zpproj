@@ -132,12 +132,16 @@ public class PGPMessage {
 
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-        String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
+        message = signMessageByteArray(message, secretKey, passPhrase);
+        writeToFile(filepath,message);
         Path path = Paths.get("test");
-        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(messageSignature)));
-//        chipherText = ;
+        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(message)));
+    }
 
-
+    public void authenticationAndPrivacy() throws IOException, PGPException {
+        PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
+        String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
+        encryptMessageUsingSessionKey(messageSignature, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
     }
 
     public void conversion() {
@@ -162,8 +166,11 @@ public class PGPMessage {
         }
         if (privacy) {
             privacy();
-
         }
+        if(authentication && privacy){
+            authenticationAndPrivacy();
+        }
+
     }
 
     /**
@@ -310,4 +317,56 @@ public class PGPMessage {
             throw new IllegalStateException("could not read file " + file, e);
         }
     }
+
+    private static void writeToFile(String filepath, String message){
+        try{
+            FileWriter fw=new FileWriter(filepath);
+            fw.write(message);
+            fw.close();
+        }catch(Exception e){System.out.println(e);}
+//        System.out.println("Success...");
+    }
+
+//    public String encryptByteArray(byte[] clearData, List<PGPPublicKey> pgpPublicKeyList)
+//            throws IOException, PGPException, NoSuchProviderException {
+//
+//        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+//
+//        OutputStream out = encOut;
+//        out = new ArmoredOutputStream(out);
+//
+//        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+//
+//        PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
+//                PGPCompressedDataGenerator.ZIP);
+//        OutputStream cos = comData.open(bOut);
+//
+//        PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
+//
+//        OutputStream pOut = lData.open(cos, PGPLiteralData.BINARY, PGPLiteralData.CONSOLE, clearData.length, new Date());
+//        pOut.write(clearData);
+//
+//        lData.close();
+//        comData.close();
+//
+//        PGPEncryptedDataGenerator cPk = new PGPEncryptedDataGenerator(new JcePGPDataEncryptorBuilder(symmetricKeyAlgorithm).setWithIntegrityPacket(true).setSecureRandom(new SecureRandom()).setProvider("BC"));
+//        pgpPublicKeyList.forEach(pgpPublicKey -> {
+//            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
+//        }););
+//
+//        cPk.addMethod(encKey);
+//
+//        byte[] bytes = bOut.toByteArray();
+//
+//        OutputStream cOut = cPk.open(out, bytes.length);
+//
+//        cOut.write(bytes); // obtain the actual bytes from the compressed stream
+//
+//        cOut.close();
+//
+//        out.close();
+//
+//        return encOut.toString();
+//    }
+
 }
