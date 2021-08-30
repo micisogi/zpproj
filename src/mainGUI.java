@@ -57,7 +57,7 @@ public class mainGUI extends JFrame {
     private JEditorPane chiphertext;
     private JCheckBox conversionCheckBox;
     private JComboBox<FromModel> from;
-    private JComboBox sendTo;
+    private JList sendTo;
     private JButton receive;
     private ButtonGroup dsaButtonGroup;
     private ButtonGroup elGamalButtonGroup;
@@ -120,17 +120,28 @@ public class mainGUI extends JFrame {
                     listOfKeysForEncription.add(pgpPublicKeyList.get(i));
                 }
             }
+            DefaultListModel<SendToModel> myModel = new DefaultListModel<SendToModel>();
             SendToModel[] models = new SendToModel[listOfKeysForEncription.size()];
             for (int i = 0; i < models.length; i++) {
                 PGPPublicKey psk = listOfKeysForEncription.get(i);
                 if (psk.getUserIDs().hasNext()) {
-                    models[i] = new SendToModel(psk.getUserIDs().next(), psk);
+                    myModel.addElement(new SendToModel(psk.getUserIDs().next(), psk));
                 } else {
-                    models[i] = new SendToModel(null, psk);
+                    myModel.addElement(new SendToModel(null, psk));
                 }
             }
-            DefaultComboBoxModel myModel = new DefaultComboBoxModel<>(models);
-
+            sendTo.setSelectionModel(new DefaultListSelectionModel() {
+                @Override
+                public void setSelectionInterval(int index0, int index1) {
+                    if(super.isSelectedIndex(index0)) {
+                        super.removeSelectionInterval(index0, index1);
+                    }
+                    else {
+                        super.addSelectionInterval(index0, index1);
+                    }
+                }
+            });
+            System.out.println(myModel.size());
             sendTo.setModel(myModel);
         } catch (IOException e) {
             e.printStackTrace();
@@ -265,6 +276,7 @@ public class mainGUI extends JFrame {
         elGamalButtonGroup.add(elGamal4096);
         elGamal1024.setSelected(true);
     }
+
     /**
      * Function used to instantiate DSA size radio buttons
      */
@@ -392,6 +404,7 @@ public class mainGUI extends JFrame {
 
     /**
      * Function used to instantiate the key rings table
+     *
      * @throws IOException
      */
     private void initTable() throws IOException {
@@ -422,12 +435,6 @@ public class mainGUI extends JFrame {
                 }
             }
         });
-        sendTo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(sendTo.getSelectedItem());
-            }
-        });
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent a) {
@@ -453,14 +460,14 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
-                if (sendTo.getSelectedItem() == null) {
+                if (sendTo.isSelectionEmpty() == true) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
 
                 String passPhrase = null;
                 if (authenticationCheckBox.isSelected()) {
-                     passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+                    passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
                     if (passPhrase == null) {
                         return;
                     }
@@ -471,7 +478,7 @@ public class mainGUI extends JFrame {
                 PGPMessage pgpmsg = new PGPMessage(
                         message.getText(),
                         fr.getSecretKey().getKeyID(),
-                        sendTo.getSelectedItem().toString(),
+                        getSelectedListItems(sendTo),
                         authenticationCheckBox.isSelected(),
                         privacyCheckBox.isSelected(),
                         compressionCheckBox.isSelected(),
@@ -500,6 +507,7 @@ public class mainGUI extends JFrame {
 
     /**
      * Function used to return a String value of the radio button selected inside the radio group
+     *
      * @param buttonGroup
      * @return
      */
@@ -516,6 +524,7 @@ public class mainGUI extends JFrame {
 
     /**
      * function used to save a  OpenPGP message into a text file
+     *
      * @param chipertex
      */
     public void saveMessage(String chipertex) {
@@ -542,5 +551,13 @@ public class mainGUI extends JFrame {
         }
     }
 
+
+    private List<Long> getSelectedListItems(JList<SendToModel> list) {
+        ArrayList<Long> returnList = new ArrayList<>();
+        list.getSelectedValuesList().forEach(model -> {
+            returnList.add(model.getPublicKeyKey().getKeyID());
+        });
+        return returnList;
+    }
 
 }
