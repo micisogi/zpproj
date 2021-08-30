@@ -299,7 +299,6 @@ public class PGPMessage {
 
     public static void decryptFile(
             InputStream in,
-            InputStream keyIn,
             char[]      passwd,
             String      defaultFileName)
             throws IOException, NoSuchProviderException
@@ -322,16 +321,23 @@ public class PGPMessage {
                 enc = (PGPEncryptedDataList)pgpF.nextObject();
             }
 
-
+            List<PGPSecretKey> secretKeyList = KeyRingHelper.getInstance().getSecretKeyRingsFromFile();
             Iterator                    it = enc.getEncryptedDataObjects();
             PGPPrivateKey               sKey = null;
             PGPPublicKeyEncryptedData   pbe = null;
-            PGPSecretKeyRingCollection  pgpSec = new PGPSecretKeyRingCollection(
-                    PGPUtil.getDecoderStream(keyIn), new JcaKeyFingerprintCalculator());
+//            PGPSecretKeyRingCollection  pgpSec = new PGPSecretKeyRingCollection(
+//                    PGPUtil.getDecoderStream(keyIn), new JcaKeyFingerprintCalculator());
 
             while (sKey == null && it.hasNext()) {
                 pbe = (PGPPublicKeyEncryptedData)it.next();
-                sKey = findSecretKey(pgpSec, pbe.getKeyID(), passwd);
+                PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(pbe.getKeyID());
+
+                System.out.println("secretKey.getKeyID()"+ secretKey.getPublicKey().getUserIDs());
+                System.out.println("secretKey.getKeyID()"+ secretKey.getKeyID());
+                System.out.println("secretKey.isPrivateKeyEmpty()"+ secretKey.isPrivateKeyEmpty());
+                if(!secretKey.isPrivateKeyEmpty())
+                    sKey = KeyRingHelper.getInstance().getPrivateKey(pbe.getKeyID(),passwd.toString());
+                System.out.println("sKey.getKeyID()"+ sKey.getKeyID());
             }
 
             if (sKey == null) {
@@ -386,27 +392,35 @@ public class PGPMessage {
             }
         }
     }
+//
+//    /**
+//     * Search a secret key ring collection for a secret key corresponding to keyID if it
+//     * exists.
+//     *
+//     * @param pgpSec a secret key ring collection.
+//     * @param keyID keyID we want.
+//     * @param pass passphrase to decrypt secret key with.
+//     * @return the private key.
+//     * @throws PGPException
+//     * @throws NoSuchProviderException
+//     */
+//    static PGPPrivateKey findSecretKey(PGPSecretKeyRingCollection pgpSec, long keyID, char[] pass)
+//            throws PGPException, NoSuchProviderException {
+//
+//        PGPSecretKey pgpSecKey = pgpSec.getSecretKey(keyID);
+//        if (pgpSecKey == null) {
+//            return null;
+//        }
+//
+//        return pgpSecKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
+//    }
+//
+//    public boolean passwordEncrypted(PGPSecretKey pgpSec){
+//            pgpSec.isPrivateKeyEmpty();
+//    }
 
-    /**
-     * Search a secret key ring collection for a secret key corresponding to keyID if it
-     * exists.
-     *
-     * @param pgpSec a secret key ring collection.
-     * @param keyID keyID we want.
-     * @param pass passphrase to decrypt secret key with.
-     * @return the private key.
-     * @throws PGPException
-     * @throws NoSuchProviderException
-     */
-    static PGPPrivateKey findSecretKey(PGPSecretKeyRingCollection pgpSec, long keyID, char[] pass)
-            throws PGPException, NoSuchProviderException {
 
-        PGPSecretKey pgpSecKey = pgpSec.getSecretKey(keyID);
-        if (pgpSecKey == null) {
-            return null;
-        }
 
-        return pgpSecKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
-    }
+
 
 }

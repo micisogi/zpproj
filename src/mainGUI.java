@@ -186,7 +186,7 @@ public class mainGUI extends JFrame {
                 try {
                     FileInputStream txt = new FileInputStream("test.txt");
                     FileInputStream dat = new FileInputStream("sckc.dat");
-                    PGPMessage.decryptFile(txt,dat,"kale".toCharArray(),"out.txt");
+                    PGPMessage.decryptFile(txt,"kale".toCharArray(),"out.txt");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 } catch (NoSuchProviderException ex) {
