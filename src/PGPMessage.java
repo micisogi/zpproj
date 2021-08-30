@@ -20,9 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
@@ -132,7 +130,7 @@ public class PGPMessage {
         return bos.toByteArray();
     }
 
-    public void authentication() throws IOException, PGPException {
+    public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
         Path path = Paths.get("test");
@@ -158,7 +156,7 @@ public class PGPMessage {
      * @throws IOException
      * @throws PGPException
      */
-    public void sendMessage() throws IOException, PGPException {
+    public void sendMessage() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         if (authentication) {
             authentication();
         }
@@ -282,10 +280,8 @@ public class PGPMessage {
      */
     public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode, String filepath) {
         try {
-            ByteArrayOutputStream encOut = new ByteArrayOutputStream();
 
-            OutputStream out = encOut;
-            out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
+            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
             byte[] bytes = compress(message);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
@@ -293,7 +289,7 @@ public class PGPMessage {
             pgpPublicKeyList.forEach(pgpPublicKey -> {
                 encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
             });
-            ByteArrayOutputStream cOut = (ByteArrayOutputStream) encGen.open(out, bytes.length);
+            OutputStream cOut = encGen.open(out, bytes.length);
 
             cOut.write(bytes);
             cOut.close();

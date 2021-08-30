@@ -18,10 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -448,7 +445,7 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Morate izabrati posaljioca.");
                     return;
                 }
-                if (!privacyCheckBox.isSelected() && sendTo.isSelectionEmpty() == true) {
+                if (privacyCheckBox.isSelected() && sendTo.isSelectionEmpty() == true) {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
@@ -496,6 +493,12 @@ public class mainGUI extends JFrame {
                     saveMessage(chiphertext.getText());
 
                 } catch (IOException | PGPException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (SignatureException e) {
+                    e.printStackTrace();
+                } catch (NoSuchProviderException e) {
                     e.printStackTrace();
                 }
             }
