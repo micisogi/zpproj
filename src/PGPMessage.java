@@ -2,25 +2,20 @@ import models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.*;
-import org.bouncycastle.jcajce.provider.symmetric.IDEA;
-import org.bouncycastle.jcajce.provider.symmetric.XSalsa20;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
-import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.jcajce.*;
-import org.bouncycastle.openpgp.operator.bc.BcPBEDataDecryptorFactory;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.io.Streams;
 import utils.KeyRingHelper;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
@@ -91,7 +86,6 @@ public class PGPMessage {
         try {
             return privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
         } catch (IOException | PGPException e) {
-//            e.printStackTrace();
             return null;
         }
     }
