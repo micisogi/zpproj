@@ -158,7 +158,6 @@ public class PGPMessage {
      *
      * @param message
      * @param secretKey
-     * @param from
      * @param passPhrase
      * @return
      * @throws IOException
@@ -166,11 +165,10 @@ public class PGPMessage {
      */
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
-                                               long from,
                                                String passPhrase) throws IOException, PGPException {
 
         byte[] messageCharArray = message.getBytes();
-        PGPPrivateKey privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+        PGPPrivateKey privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
         PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
         signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
 
@@ -181,7 +179,7 @@ public class PGPMessage {
         Iterator it = secretKey.getPublicKey().getUserIDs();
         if (it.hasNext()) {
             PGPSignatureSubpacketGenerator spGen = new PGPSignatureSubpacketGenerator();
-            spGen.setSignerUserID(false, (String) it.next());
+            spGen.addSignerUserID(false, (String) it.next());
             signatureGenerator.setHashedSubpackets(spGen.generate());
         }
         PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(PGPCompressedData.ZLIB);
