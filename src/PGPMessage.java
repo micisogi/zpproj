@@ -31,11 +31,12 @@ public class PGPMessage {
     long from;
     List<Long> sendTo;
     private boolean authentication, privacy, compression, conversion, des, idea;
-    private String chipertext;
     User userSendTo;
     String passPhrase;
     PGPPrivateKey privateKey;
     int symmetricKeyAlgorithm;
+    String filepath;
+
 
     public PGPMessage(String message,
                       long from,
@@ -62,6 +63,14 @@ public class PGPMessage {
 
         userSendTo = User.getInfoFromUser(sendTo.toString());
 
+    }
+
+    public String getFilepath() {
+        return filepath;
+    }
+
+    public void setFilepath(String filepath) {
+        this.filepath = filepath;
     }
 
     /**
@@ -92,14 +101,6 @@ public class PGPMessage {
         }
     }
 
-    public String getChipertext() {
-        return chipertext;
-    }
-
-    public void setChipertext(String chipertext) {
-        this.chipertext = chipertext;
-    }
-
     /**
      * A function used to compress a message
      *
@@ -120,16 +121,19 @@ public class PGPMessage {
         return bos.toByteArray();
     }
 
-    public void authentication(String from, String sendTo, String alg) {
-
-    }
-
-    public void compression() {
+    public void authentication() throws IOException, PGPException {
+        PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
+        String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
 
     }
 
     public void conversion() {
 
+    }
+
+    public void privacy() throws IOException, PGPException {
+        encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
+        return;
     }
 
 
@@ -141,18 +145,10 @@ public class PGPMessage {
      */
     public void sendMessage() throws IOException, PGPException {
         if (authentication) {
-            PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-            String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
-
-            chipertext = messageSignature;
+            authentication();
         }
         if (privacy) {
-
-            byte[] ch = encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm);
-//             createEncryptedData(publicKey,message.getBytes());
-//            chipertext = msg;
-//            String encryptedMessage = null;
-//            encryptedMessage = encryptByteArray(message.getBytes(), publicKey);
+            privacy();
 
         }
     }
@@ -271,10 +267,10 @@ public class PGPMessage {
      * @param symetricAlgoritmCode
      * @return
      */
-    public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode) {
+    public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode, String filepath) {
         try {
 
-            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream("test.txt")));
+            OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
             byte[] bytes = compress(message);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
@@ -296,4 +292,10 @@ public class PGPMessage {
         return null;
     }
 
+//    private void readFromFile() throws IOException {
+//        FileReader reader = new FileReader( filepath);
+//        BufferedReader br = new BufferedReader(reader);
+//        edit.read( br, null );
+//        br.close();
+//    }
 }
