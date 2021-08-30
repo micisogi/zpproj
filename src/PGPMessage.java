@@ -3,13 +3,14 @@ import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
-import org.bouncycastle.openpgp.examples.PGPExampleUtil;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.*;
 import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.io.Streams;
 import utils.KeyRingHelper;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -129,7 +130,7 @@ public class PGPMessage {
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         message = signMessageByteArray(message, secretKey, passPhrase);
-        writeToFile(filepath,message);
+        writeToFile(filepath, message);
         Path path = Paths.get("test");
         Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(message)));
     }
@@ -163,7 +164,7 @@ public class PGPMessage {
         if (privacy) {
             privacy();
         }
-        if(authentication && privacy){
+        if (authentication && privacy) {
             authenticationAndPrivacy();
         }
 
@@ -314,12 +315,14 @@ public class PGPMessage {
         }
     }
 
-    private static void writeToFile(String filepath, String message){
-        try{
-            FileWriter fw=new FileWriter(filepath);
+    private static void writeToFile(String filepath, String message) {
+        try {
+            FileWriter fw = new FileWriter(filepath);
             fw.write(message);
             fw.close();
-        }catch(Exception e){System.out.println(e);}
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 //        System.out.println("Success...");
     }
 
@@ -366,35 +369,87 @@ public class PGPMessage {
 //    }
 
 
-    public static void decrypt(InputStream in) throws IOException {
+    public static void decrypt(InputStream in, JPanel mainPanel) throws IOException {
         in = PGPUtil.getDecoderStream(in);
         try {
             JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
             PGPEncryptedDataList enc;
-            Object                  o = pgpF.nextObject();
+            Object o = pgpF.nextObject();
             //
             // the first object might be a PGP marker packet.
             //
-            if (o instanceof PGPEncryptedDataList)
-            {
-                enc = (PGPEncryptedDataList)o;
+            if (o instanceof PGPEncryptedDataList) {
+                enc = (PGPEncryptedDataList) o;
+            } else {
+                enc = (PGPEncryptedDataList) pgpF.nextObject();
             }
-            else
-            {
-                enc = (PGPEncryptedDataList)pgpF.nextObject();
-            }
-            Iterator                    it = enc.getEncryptedDataObjects();
-            PGPPrivateKey               sKey = null;
-            PGPPublicKeyEncryptedData   pbe = null;
+            Iterator it = enc.getEncryptedDataObjects();
+            PGPPrivateKey sKey = null;
+            PGPPublicKeyEncryptedData pbe = null;
 
-            while (sKey == null && it.hasNext())
-            {
-                pbe = (PGPPublicKeyEncryptedData)it.next();
-                sKey = KeyRingHelper.getInstance().getPrivateKey(pbe.getKeyID());
+            while (sKey == null && it.hasNext()) {
+                pbe = (PGPPublicKeyEncryptedData) it.next();
+                char[] myChars = new char[1];
+                myChars[0] = '"';
+                sKey = KeyRingHelper.getInstance().getPrivateKey(pbe.getKeyID(), myChars);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            InputStream clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
+            JcaPGPObjectFactory plainFact = new JcaPGPObjectFactory(clear);
+            Object message = plainFact.nextObject();
+            if (message instanceof PGPCompressedData) {
+                PGPCompressedData cData = (PGPCompressedData) message;
+                JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
+
+                message = pgpFact.nextObject();
+            }
+            String outFileName;
+            if (message instanceof PGPLiteralData) {
+                PGPLiteralData ld = (PGPLiteralData) message;
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
+                int result = fileChooser.showOpenDialog(mainPanel);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                   outFileName = selectedFile.getAbsolutePath();
+                    if (!outFileName.substring(outFileName.lastIndexOf(".") + 1).equals("txt"))
+                        outFileName += ".txt";
+                } else {
+                    outFileName = ld.getFileName();
+                    if (outFileName.length() == 0) {
+                        outFileName = "defaultImeFajla";
+                    }
+                }
+
+                InputStream unc = ld.getInputStream();
+                OutputStream fOut = new FileOutputStream(outFileName);
+
+                Streams.pipeAll(unc, fOut);
+
+                fOut.close();
+            } else if (message instanceof PGPOnePassSignatureList) {
+                throw new PGPException("encrypted message contains a signed message - not literal data.");
+            } else {
+                throw new PGPException("message is not a simple encrypted file - type unknown.");
+            }
+
+            if (pbe.isIntegrityProtected()) {
+                if (!pbe.verify()) {
+                    JOptionPane.showMessageDialog(null, "Message failed integrity check.");
+                    System.err.println("");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Message integrity check passed.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "No message integrity check.");
+            }
+
+        } catch (PGPException e) {
+            System.err.println(e);
+            if (e.getUnderlyingException() != null) {
+                e.getUnderlyingException().printStackTrace();
+            }
         }
-        String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
     }
 }

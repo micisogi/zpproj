@@ -9,6 +9,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
 import javax.swing.*;
 import java.io.*;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -458,15 +459,20 @@ public class KeyRingHelper {
 
     }
 
-    public PGPPrivateKey getPrivateKey(long userId) throws PGPException {
+    public PGPPrivateKey getPrivateKey(long userId, char[] ch) {
 
         PGPSecretKey secret = getSecretKey(userId);
+        PGPPrivateKey sk;
         if (secret == null) {
             return null;
         }
-        String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
-        return secret.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
-
+        try {
+            sk = secret.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(ch));
+            return sk;
+        } catch (PGPException e) {
+            String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+            return getPrivateKey(userId, passPhrase.toCharArray());
+        }
     }
 
     /**
