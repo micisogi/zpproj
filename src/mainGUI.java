@@ -291,8 +291,6 @@ public class mainGUI extends JFrame {
                     try {
                         KeyRingHelper.getInstance().readPublicKey(selectedFile.getAbsolutePath());
                     } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (PGPException e) {
                         try {
                             KeyRingHelper.getInstance().readSecretKey(selectedFile.getAbsolutePath());
                         } catch (IOException ioException) {
@@ -300,6 +298,8 @@ public class mainGUI extends JFrame {
                         } catch (PGPException pgpException) {
                             pgpException.printStackTrace();
                         }
+                        e.printStackTrace();
+                    } catch (PGPException e) {
                         e.printStackTrace();
                     }
                 }
