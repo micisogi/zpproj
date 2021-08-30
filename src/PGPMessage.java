@@ -411,6 +411,10 @@ public class PGPMessage {
                 myChars[0] = '"';
                 sKey = KeyRingHelper.getInstance().getPrivateKey(pbe.getKeyID(), myChars);
             }
+            if (sKey == null) {
+                JOptionPane.showMessageDialog(null, "There is no private key for decryption");
+                return;
+            }
 
             InputStream clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
             JcaPGPObjectFactory plainFact = new JcaPGPObjectFactory(clear);
