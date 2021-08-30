@@ -531,8 +531,6 @@ public class mainGUI extends JFrame {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "You have to choose a key to export");
         }
     }
 

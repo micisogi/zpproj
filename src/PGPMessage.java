@@ -6,12 +6,9 @@ import org.bouncycastle.bcpg.*;
 import org.bouncycastle.jcajce.provider.symmetric.IDEA;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.*;
 import org.bouncycastle.openpgp.operator.bc.BcPBEDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
-import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 import org.bouncycastle.util.Strings;
 import utils.KeyRingHelper;
 
@@ -142,9 +139,10 @@ public class PGPMessage {
     public void sendMessage() throws IOException, PGPException {
         if (authentication) {
             PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-            String messageSignature = signMessageByteArray(message, secretKey, from, passPhrase);
+            String signedMessage = signMessageByteArray(message, secretKey, passPhrase);
+            System.out.println(signedMessage);
 
-            chipertext = messageSignature;
+//            chipertext = messageSignature.toString();
         }
         if (privacy) {
 
@@ -162,7 +160,6 @@ public class PGPMessage {
      *
      * @param message
      * @param secretKey
-     * @param from
      * @param passPhrase
      * @return
      * @throws IOException
@@ -170,11 +167,10 @@ public class PGPMessage {
      */
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
-                                               long from,
                                                String passPhrase) throws IOException, PGPException {
 
         byte[] messageCharArray = message.getBytes();
-        PGPPrivateKey privateKey = KeyRingHelper.getInstance().getPrivateKey(from, passPhrase);
+        PGPPrivateKey privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
         PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
         signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
 
@@ -185,7 +181,7 @@ public class PGPMessage {
         Iterator it = secretKey.getPublicKey().getUserIDs();
         if (it.hasNext()) {
             PGPSignatureSubpacketGenerator spGen = new PGPSignatureSubpacketGenerator();
-            spGen.setSignerUserID(false, (String) it.next());
+            spGen.addSignerUserID(false, (String) it.next());
             signatureGenerator.setHashedSubpackets(spGen.generate());
         }
         PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(PGPCompressedData.ZLIB);
