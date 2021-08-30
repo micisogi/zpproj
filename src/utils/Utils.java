@@ -3,15 +3,14 @@ package utils;
 import models.User;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKey;
+import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.NoSuchProviderException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -170,5 +169,18 @@ public class Utils {
     public static String insertStringBeforeDot(String old, String toInsert) {
         int at = old.lastIndexOf(".");
         return old.substring(0, at) + toInsert + old.substring(at);
+    }
+
+    static PGPPrivateKey findSecretKey(PGPSecretKeyRingCollection pgpSec, long keyID, char[] pass)
+            throws PGPException, NoSuchProviderException
+    {
+        PGPSecretKey pgpSecKey = pgpSec.getSecretKey(keyID);
+
+        if (pgpSecKey == null)
+        {
+            return null;
+        }
+
+        return pgpSecKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
     }
 }
