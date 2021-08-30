@@ -42,6 +42,7 @@ public class KeyRingHelper {
 
     /**
      * Function to return an object of the singleton
+     *
      * @return
      * @throws IOException
      */
@@ -58,6 +59,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function to save a secret key ring to the secret key ring collection file
+     *
      * @param pgpSecretKeyRing
      * @return
      */
@@ -85,6 +87,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function to save a secret key ring to the public key ring collection file
+     *
      * @param pgpPublicKeyRing
      * @return
      */
@@ -109,6 +112,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to delete a Key Ring
+     *
      * @param keyRingIdHexa
      */
     public void deleteKeyRing(String keyRingIdHexa) {
@@ -139,6 +143,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to remove the secret key from the secretKeyRingCollection
+     *
      * @param keyId
      */
     private void removeSecretKey(long keyId) {
@@ -167,6 +172,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to return a list of secret keys stored in the secret key ring collection file
+     *
      * @return
      */
     public List<PGPSecretKey> getSecretKeyRingsFromFile() {
@@ -197,6 +203,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to return a list of public keys stored in the public key ring collection file
+     *
      * @return
      */
     public List<PGPPublicKey> getPublicKeyRingsFromFile() {
@@ -223,6 +230,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to read a public .asc file
+     *
      * @param fileName
      * @return
      * @throws IOException
@@ -237,6 +245,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function to insert a public key into the public key ring collection file
+     *
      * @param input
      * @return
      * @throws IOException
@@ -269,6 +278,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to read a secret .asc file
+     *
      * @param fileName
      * @return
      * @throws IOException
@@ -283,6 +293,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function to insert a secret key into the secret key ring collection file
+     *
      * @param input
      * @return
      * @throws IOException
@@ -309,6 +320,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to export the public key ring into a .asc file
+     *
      * @param keyRingIdHexa
      * @param filePath
      * @throws IOException
@@ -331,6 +343,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to export the secret key ring into a .asc file
+     *
      * @param keyRingIdHexa
      * @param filePath
      * @throws IOException
@@ -352,6 +365,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to save a public key ring collection into a file
+     *
      * @param prc
      * @throws IOException
      */
@@ -366,6 +380,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to save a secret key ring collection into a file
+     *
      * @param src
      * @throws IOException
      */
@@ -378,6 +393,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to check if a public key ring with given Id exists
+     *
      * @param keyRingId
      * @param pkrc
      * @return
@@ -392,6 +408,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to check if a secret key ring with given Id exists
+     *
      * @param keyRingId
      * @param skrc
      * @return
@@ -406,6 +423,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to return a secret key from the secret key ring collection file
+     *
      * @param userId
      * @return
      * @throws IOException
@@ -423,6 +441,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to check if password for the secret key matches
+     *
      * @param userId
      * @param passPhrase
      * @return
@@ -439,6 +458,7 @@ public class KeyRingHelper {
 
     /**
      * A helper function used to return a public key from the public key ring collection file
+     *
      * @param keyID
      * @return
      * @throws IOException
@@ -450,6 +470,30 @@ public class KeyRingHelper {
                     PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
             return pgpPubCollection.getPublicKey(keyID);
         }
+    }
 
+    public List<PGPPublicKey> getPublicKeysBasedOnKeys(List<Long> keyIDs) throws IOException, PGPException {
+
+        ArrayList<PGPPublicKey> returnList = new ArrayList<>();
+        try (FileInputStream keyInputStream = new FileInputStream(PUBLIC_KEY_RING_COLLECTION_FILE_PATH)) {
+            PGPPublicKeyRingCollection pgpPubCollection = new PGPPublicKeyRingCollection(
+                    PGPUtil.getDecoderStream(keyInputStream), new JcaKeyFingerprintCalculator());
+            keyIDs.forEach(keyID -> {
+                try {
+                    PGPPublicKeyRing keyRing = pgpPubCollection.getPublicKeyRing(keyID);
+                    Iterator keyRingIter = keyRing.getPublicKeys();
+                    while (keyRingIter.hasNext()) {
+                        PGPPublicKey key = (PGPPublicKey) keyRingIter.next();
+                        if (key.isEncryptionKey()) {
+                            returnList.add(key);
+                        }
+                    }
+
+                } catch (PGPException e) {
+                    e.printStackTrace();
+                }
+            });
+            return returnList;
+        }
     }
 }
