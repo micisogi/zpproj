@@ -184,25 +184,15 @@ public class mainGUI extends JFrame {
                     File selectedFile = fileChooser.getSelectedFile();
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
-                        if (absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("sig")){
+                        if (absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("sig")) {
                             InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
-                            PGPMessage.verifyFile(in,mainPanel);
-                        }else if(absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("gpg")){
+                            PGPMessage.verifyFile(in, mainPanel);
+                        } else if (absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("gpg")) {
                             InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
                             PGPMessage.decrypt(in, mainPanel);
-                        }
-                        else{
+                        } else {
                             JOptionPane.showMessageDialog(null, "Unrecoginzed file extension.");
                         }
-
-
-//                        if (etf.openpgp.rl150658dsm130656d.models.PGPMessage.verifyFile(fis)) {
-//                            JOptionPane.showMessageDialog(null, "Signature is valid.");
-//                            return;
-//                        } else {
-//                            JOptionPane.showMessageDialog(null, "Signature verification failed.");
-//                            return;
-//                        }
                     } catch (FileNotFoundException fileNotFoundException) {
                     } catch (Exception exception) {
                         exception.printStackTrace();
@@ -387,9 +377,9 @@ public class mainGUI extends JFrame {
                     int row = table1.getSelectedRow();
                     String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
                     try {
-                       if (!KeyRingHelper.getInstance().verifyPassPhrase(Utils.getInstance().hexStringToLongID(hexValue),table1.getModel().getValueAt(row, 5).toString())){
-                           return;
-                       }
+                        if (!KeyRingHelper.getInstance().verifyPassPhrase(Utils.getInstance().hexStringToLongID(hexValue), table1.getModel().getValueAt(row, 5).toString())) {
+                            return;
+                        }
                         KeyRingHelper.getInstance().deleteKeyRing(hexValue);
                         model.removeRow(table1.getSelectedRow());
                     } catch (IOException | PGPException e) {
