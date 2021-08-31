@@ -1,4 +1,6 @@
-import models.User;
+package etf.openpgp.rl150658dsm130656d.models;
+
+import etf.openpgp.rl150658dsm130656d.models.User;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
@@ -6,8 +8,8 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyPair;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
-import utils.KeyRingHelper;
-import utils.Utils;
+import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
+import etf.openpgp.rl150658dsm130656d.models.utils.Utils;
 
 import javax.crypto.spec.DHParameterSpec;
 import java.io.IOException;
