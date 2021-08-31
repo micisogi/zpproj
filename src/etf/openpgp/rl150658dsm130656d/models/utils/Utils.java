@@ -1,11 +1,8 @@
-package utils;
+package etf.openpgp.rl150658dsm130656d.models.utils;
 
-import models.User;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import etf.openpgp.rl150658dsm130656d.models.User;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
-import org.bouncycastle.util.encoders.Hex;
 
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
@@ -31,6 +28,7 @@ public class Utils {
     private Utils() {
         users = new ArrayList<>();
     }
+
 
     public ArrayList<User> getUsers() {
         return users;
@@ -171,6 +169,16 @@ public class Utils {
         return old.substring(0, at) + toInsert + old.substring(at);
     }
 
+    /**
+     * A function used to get secret key from keyID and passphrase
+     *
+     * @param pgpSec
+     * @param keyID
+     * @param pass
+     * @return
+     * @throws PGPException
+     * @throws NoSuchProviderException
+     */
     static PGPPrivateKey findSecretKey(PGPSecretKeyRingCollection pgpSec, long keyID, char[] pass)
             throws PGPException, NoSuchProviderException
     {

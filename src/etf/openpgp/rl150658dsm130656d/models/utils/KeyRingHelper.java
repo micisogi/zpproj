@@ -1,4 +1,4 @@
-package utils;
+package etf.openpgp.rl150658dsm130656d.models.utils;
 
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
@@ -9,7 +9,6 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
 import javax.swing.*;
 import java.io.*;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -498,6 +497,14 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to return a public key from the keyID
+     *
+     * @param keyIDs
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     public List<PGPPublicKey> getPublicKeysBasedOnKeys(List<Long> keyIDs) throws IOException, PGPException {
 
         ArrayList<PGPPublicKey> returnList = new ArrayList<>();

@@ -1,12 +1,14 @@
-import models.FromModel;
-import models.SendToModel;
+package etf.openpgp.rl150658dsm130656d.models;
+
+import etf.openpgp.rl150658dsm130656d.models.FromModel;
+import etf.openpgp.rl150658dsm130656d.models.SendToModel;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import utils.KeyRingHelper;
-import utils.Utils;
+import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
+import etf.openpgp.rl150658dsm130656d.models.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -194,7 +196,7 @@ public class mainGUI extends JFrame {
                         }
 
 
-//                        if (PGPMessage.verifyFile(fis)) {
+//                        if (etf.openpgp.rl150658dsm130656d.models.PGPMessage.verifyFile(fis)) {
 //                            JOptionPane.showMessageDialog(null, "Signature is valid.");
 //                            return;
 //                        } else {

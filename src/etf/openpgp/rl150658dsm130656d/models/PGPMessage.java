@@ -1,4 +1,6 @@
-import models.User;
+package etf.openpgp.rl150658dsm130656d.models;
+
+import etf.openpgp.rl150658dsm130656d.models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -7,7 +9,7 @@ import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.*;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
-import utils.KeyRingHelper;
+import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A class used to generate a PGPMessage
+ * A class used to generate a etf.openpgp.rl150658dsm130656d.models.PGPMessage
  */
 public class PGPMessage {
     private String message;
