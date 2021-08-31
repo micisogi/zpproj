@@ -4,6 +4,7 @@ import models.User;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import utils.KeyRingHelper;
@@ -184,8 +185,18 @@ public class mainGUI extends JFrame {
                     File selectedFile = fileChooser.getSelectedFile();
                     String absolutePath = selectedFile.getAbsolutePath();
                     try {
-                        InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
-                        PGPMessage.decrypt(in, mainPanel);
+                        if (absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("sig")){
+                            InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
+                            PGPMessage.verifyFile(in,mainPanel);
+                        }else if(absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("gpg")){
+                            InputStream in = new BufferedInputStream(new FileInputStream(absolutePath));
+                            PGPMessage.decrypt(in, mainPanel);
+                        }
+                        else{
+                            JOptionPane.showMessageDialog(null, "Unrecoginzed file extension.");
+                        }
+
+
 //                        if (PGPMessage.verifyFile(fis)) {
 //                            JOptionPane.showMessageDialog(null, "Signature is valid.");
 //                            return;
@@ -195,6 +206,7 @@ public class mainGUI extends JFrame {
 //                        }
                     } catch (FileNotFoundException fileNotFoundException) {
                     } catch (Exception exception) {
+                        exception.printStackTrace();
                     }
                 }
             }
