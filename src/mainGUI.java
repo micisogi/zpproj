@@ -541,6 +541,12 @@ public class mainGUI extends JFrame {
         return null;
     }
 
+    /**
+     * A function used to get list of selected recipients
+     *
+     * @param list
+     * @return
+     */
     private List<Long> getSelectedListItems(JList<SendToModel> list) {
         ArrayList<Long> returnList = new ArrayList<>();
         list.getSelectedValuesList().forEach(model -> {
