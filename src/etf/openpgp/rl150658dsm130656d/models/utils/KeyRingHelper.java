@@ -1,4 +1,4 @@
-package utils;
+package etf.openpgp.rl150658dsm130656d.models.utils;
 
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
@@ -9,7 +9,6 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
 import javax.swing.*;
 import java.io.*;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -459,6 +458,13 @@ public class KeyRingHelper {
 
     }
 
+    /**
+     * A helper function used to check if password for the secret key matches
+     *
+     * @param userId
+     * @param ch
+     * @return
+     */
     public PGPPrivateKey getPrivateKey(long userId, char[] ch) {
 
         PGPSecretKey secret = getSecretKey(userId);
@@ -491,6 +497,14 @@ public class KeyRingHelper {
         }
     }
 
+    /**
+     * A helper function used to return a public key from the keyID
+     *
+     * @param keyIDs
+     * @return
+     * @throws IOException
+     * @throws PGPException
+     */
     public List<PGPPublicKey> getPublicKeysBasedOnKeys(List<Long> keyIDs) throws IOException, PGPException {
 
         ArrayList<PGPPublicKey> returnList = new ArrayList<>();
@@ -515,4 +529,28 @@ public class KeyRingHelper {
             return returnList;
         }
     }
+
+    /**
+     * A function used to verufy password before delition
+     *
+     * @param keyId
+     * @param type
+     * @return
+     * @throws PGPException
+     * @throws IOException
+     */
+    public boolean verifyPassPhrase(long keyId, String type) throws PGPException, IOException {
+        if (type.equals("PUBLIC")) return true;
+        else {
+            String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+            PGPPrivateKey privKey = KeyRingHelper.getInstance().getPrivateKey(keyId, passPhrase.toCharArray());
+
+            if (privKey == null) return true;
+            else {
+            System.out.println("VERIFIED SECRET KEY:" + privKey.getKeyID());
+                return true;
+            }
+        }
+    }
+
 }

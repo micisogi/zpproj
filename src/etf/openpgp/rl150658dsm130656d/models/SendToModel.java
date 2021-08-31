@@ -1,4 +1,4 @@
-package models;
+package etf.openpgp.rl150658dsm130656d.models;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
 

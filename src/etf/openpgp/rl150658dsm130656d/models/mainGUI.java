@@ -1,12 +1,14 @@
-import models.FromModel;
-import models.SendToModel;
+package etf.openpgp.rl150658dsm130656d.models;
+
+import etf.openpgp.rl150658dsm130656d.models.FromModel;
+import etf.openpgp.rl150658dsm130656d.models.SendToModel;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import utils.KeyRingHelper;
-import utils.Utils;
+import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
+import etf.openpgp.rl150658dsm130656d.models.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -194,7 +196,7 @@ public class mainGUI extends JFrame {
                         }
 
 
-//                        if (PGPMessage.verifyFile(fis)) {
+//                        if (etf.openpgp.rl150658dsm130656d.models.PGPMessage.verifyFile(fis)) {
 //                            JOptionPane.showMessageDialog(null, "Signature is valid.");
 //                            return;
 //                        } else {
@@ -356,6 +358,12 @@ public class mainGUI extends JFrame {
         });
     }
 
+    /**
+     * The main function
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         JFrame frame = new mainGUI("ZP PROJEKAT UBI ME");
@@ -379,9 +387,12 @@ public class mainGUI extends JFrame {
                     int row = table1.getSelectedRow();
                     String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
                     try {
+                       if (!KeyRingHelper.getInstance().verifyPassPhrase(Utils.getInstance().hexStringToLongID(hexValue),table1.getModel().getValueAt(row, 5).toString())){
+                           return;
+                       }
                         KeyRingHelper.getInstance().deleteKeyRing(hexValue);
                         model.removeRow(table1.getSelectedRow());
-                    } catch (IOException e) {
+                    } catch (IOException | PGPException e) {
                         e.printStackTrace();
 
                     }
@@ -457,6 +468,14 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
+                if (compressionCheckBox.isSelected() && !authenticationCheckBox.isSelected() && !privacyCheckBox.isSelected() && message.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Morate uneti poruku.");
+                    return;
+                }
+                if (conversionCheckBox.isSelected() && !authenticationCheckBox.isSelected() && !privacyCheckBox.isSelected() && message.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Morate uneti poruku.");
+                    return;
+                }
 
                 String passPhrase = null;
                 if (authenticationCheckBox.isSelected()) {
@@ -482,7 +501,7 @@ public class mainGUI extends JFrame {
                         passPhrase);
 
                 if (authenticationCheckBox.isSelected() && !pgpmsg.verifyPassPhrase()) {
-                    JOptionPane.showMessageDialog(null, "Pogresna lozinka");
+                    JOptionPane.showMessageDialog(null, "Pogresna lozinka.");
                     return;
                 }
 

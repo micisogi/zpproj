@@ -1,4 +1,6 @@
-import models.User;
+package etf.openpgp.rl150658dsm130656d.models;
+
+import etf.openpgp.rl150658dsm130656d.models.User;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -7,7 +9,7 @@ import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.*;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
-import utils.KeyRingHelper;
+import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -26,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A class used to generate a PGPMessage
+ * A class used to generate a etf.openpgp.rl150658dsm130656d.models.PGPMessage
  */
 public class PGPMessage {
     private String message;
@@ -141,10 +143,12 @@ public class PGPMessage {
      * @throws NoSuchProviderException
      */
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
-        System.out.println("Usao sam autentikacija");
-        PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-        message = signMessageByteArray(message, secretKey, passPhrase);
-        writeToFile(filepath, message);
+       if(!privacy) {
+           System.out.println("Usao sam autentikacija");
+           PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
+           message = signMessageByteArray(message, secretKey, passPhrase);
+           writeToFile(filepath, message);
+       }
 
     }
 
@@ -160,7 +164,15 @@ public class PGPMessage {
         encryptMessageUsingSessionKey(messageSignature, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
     }
 
+    /**
+     * A function used to convert a message from a file
+     *
+     * @throws IOException
+     */
     public void conversion() throws IOException {
+        if(!authentication && !privacy && !compression){
+            writeToFile(filepath,message);
+        }
         Path path = Paths.get(filepath);
         String msg = readFromFileIntoString(filepath);
         Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(msg)));
@@ -173,8 +185,10 @@ public class PGPMessage {
      * @throws PGPException
      */
     public void privacy() throws IOException, PGPException {
-        encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
-        return;
+        if(!authentication) {
+            encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
+            return;
+        }
     }
 
     /**
@@ -183,6 +197,9 @@ public class PGPMessage {
      * @throws IOException
      */
     private void compression() throws IOException {
+        if(!privacy && !authentication){
+            writeToFile(filepath,message);
+        }
         String str = readFromFileIntoString(filepath);
         byte[] bytes = compress(str);
         ByteArrayOutputStream encOut = new ByteArrayOutputStream();
@@ -200,16 +217,16 @@ public class PGPMessage {
      * @throws PGPException
      */
     public void sendMessage() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
-        if (authentication && !privacy) {
+        if (authentication) {
             authentication();
         }
-        if (privacy && !authentication) {
+        if (privacy) {
             privacy();
         }
         if (authentication && privacy) {
             authenticationAndPrivacy();
         }
-        if (compression && !privacy) {
+        if(compression){
             compression();
         }
         if (conversion) {
@@ -231,7 +248,7 @@ public class PGPMessage {
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
                                                String passPhrase) throws IOException, PGPException {
-        System.out.println("usaoi u auth");
+
         byte[] messageCharArray = message.getBytes();
         PGPPrivateKey privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
         PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
@@ -310,16 +327,16 @@ public class PGPMessage {
         }
         return null;
     }
-
-
-    private static String encodeFileToBase64(File file) {
-        try {
-            byte[] fileContent = Files.readAllBytes(file.toPath());
-            return Base64.getEncoder().encodeToString(fileContent);
-        } catch (IOException e) {
-            throw new IllegalStateException("could not read file " + file, e);
-        }
-    }
+//
+//
+//    private static String encodeFileToBase64(File file) {
+//        try {
+//            byte[] fileContent = Files.readAllBytes(file.toPath());
+//            return Base64.getEncoder().encodeToString(fileContent);
+//        } catch (IOException e) {
+//            throw new IllegalStateException("could not read file " + file, e);
+//        }
+//    }
 
     /**
      * Function used to write a message into a file
