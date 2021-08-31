@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
@@ -366,6 +367,7 @@ public class PGPMessage {
      */
     public static void decrypt(InputStream in, JPanel mainPanel) throws IOException {
         System.out.println("USAO U DECRYPT");
+        String dialogMessage = new String();
         in = PGPUtil.getDecoderStream(in);
         try {
             JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
@@ -397,7 +399,8 @@ public class PGPMessage {
             InputStream clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
             JcaPGPObjectFactory plainFact = new JcaPGPObjectFactory(clear);
             Object message = plainFact.nextObject();
-            JcaPGPObjectFactory pgpFact=new JcaPGPObjectFactory(in);;
+            JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(in);
+            ;
             if (message instanceof PGPCompressedData) {
                 PGPCompressedData cData = (PGPCompressedData) message;
                 pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
@@ -439,37 +442,21 @@ public class PGPMessage {
                 InputStream dIn = p2.getInputStream();
                 int ch;
                 PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-                System.out.println("KEY ID" +key.getKeyID());
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-                fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
-                int result = fileChooser.showOpenDialog(mainPanel);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    outFileName = selectedFile.getAbsolutePath();
-                    if (!outFileName.substring(outFileName.lastIndexOf(".") + 1).equals("txt"))
-                        outFileName += ".txt";
-                } else {
-                    outFileName = p2.getFileName();
-                    if (outFileName.length() == 0) {
-                        outFileName = "defaultImeFajla";
-                    }
+                if (key == null) {
+                    JOptionPane.showMessageDialog(null, "Message Could not be verified, make sure you have the public key.");
+                    return;
                 }
-                OutputStream fOut = new FileOutputStream(outFileName);
-                ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
-                while ((ch = dIn.read()) >= 0) {
-                    ops.update((byte) ch);
-                    fOut.write(ch);
-                }
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+                dialogMessage = "Message signed by : " + dialogMessage + key.getUserIDs().next() + "\n Signature Created at : " + sdf.format(key.getCreationTime());
 
-                fOut.close();
 
                 PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
 
                 if (ops.verify(p3.get(0))) {
+                    dialogMessage = dialogMessage + "\n Signature verified";
                     System.out.println("signature verified.");
                 } else {
-                    System.out.println("signature verification failed.");
+                    dialogMessage = dialogMessage + "\n Signature verification failed";
                 }
 
             } else {
@@ -478,15 +465,16 @@ public class PGPMessage {
 
             if (pbe.isIntegrityProtected()) {
                 if (!pbe.verify()) {
-                    JOptionPane.showMessageDialog(null, "Message failed integrity check.");
-                    System.err.println("");
+                    dialogMessage = dialogMessage + "\n Message failed integrity check";
                 } else {
-                    JOptionPane.showMessageDialog(null, "Message integrity check passed.");
+                    dialogMessage = dialogMessage + "\n Message integrity check passed.";
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "No message integrity check.");
+                dialogMessage = dialogMessage + "\n No message integrity check.";
+
             }
 
+            JOptionPane.showMessageDialog(null, dialogMessage);
         } catch (PGPException e) {
             System.err.println(e);
             if (e.getUnderlyingException() != null) {
