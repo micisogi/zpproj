@@ -540,41 +540,25 @@ public class mainGUI extends JFrame {
     public String getFilePath() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("*.gpg", "gpg"));
         int result = fileChooser.showOpenDialog(mainPanel);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             String absolutePath = selectedFile.getAbsolutePath();
-            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
-                absolutePath += ".txt";
+            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("gpg"))
+                absolutePath += ".gpg";
 
             return absolutePath;
         }
         return null;
     }
 
-    public void saveMessage(String chipertex) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
-        int result = fileChooser.showOpenDialog(mainPanel);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            String absolutePath = selectedFile.getAbsolutePath();
-            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
-                absolutePath += ".txt";
-
-            byte message[] = chipertex.getBytes(StandardCharsets.UTF_8);
-            try (FileOutputStream fos = new FileOutputStream(absolutePath)) {
-                fos.write(message);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
+    /**
+     * A function used to get list of selected recipients
+     *
+     * @param list
+     * @return
+     */
     private List<Long> getSelectedListItems(JList<SendToModel> list) {
         ArrayList<Long> returnList = new ArrayList<>();
         list.getSelectedValuesList().forEach(model -> {
