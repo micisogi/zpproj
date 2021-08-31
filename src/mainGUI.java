@@ -457,6 +457,14 @@ public class mainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Morate izabrati primaoca.");
                     return;
                 }
+                if (compressionCheckBox.isSelected() && !authenticationCheckBox.isSelected() && !privacyCheckBox.isSelected() && message.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Morate uneti poruku.");
+                    return;
+                }
+                if (conversionCheckBox.isSelected() && !authenticationCheckBox.isSelected() && !privacyCheckBox.isSelected() && message.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Morate uneti poruku.");
+                    return;
+                }
 
                 String passPhrase = null;
                 if (authenticationCheckBox.isSelected()) {
@@ -482,7 +490,7 @@ public class mainGUI extends JFrame {
                         passPhrase);
 
                 if (authenticationCheckBox.isSelected() && !pgpmsg.verifyPassPhrase()) {
-                    JOptionPane.showMessageDialog(null, "Pogresna lozinka");
+                    JOptionPane.showMessageDialog(null, "Pogresna lozinka.");
                     return;
                 }
 

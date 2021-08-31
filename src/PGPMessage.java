@@ -140,10 +140,12 @@ public class PGPMessage {
      * @throws NoSuchProviderException
      */
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
-        System.out.println("Usao sam autentikacija");
-        PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
-        message = signMessageByteArray(message, secretKey, passPhrase);
-        writeToFile(filepath, message);
+       if(!privacy) {
+           System.out.println("Usao sam autentikacija");
+           PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
+           message = signMessageByteArray(message, secretKey, passPhrase);
+           writeToFile(filepath, message);
+       }
 
     }
 
@@ -160,6 +162,9 @@ public class PGPMessage {
     }
 
     public void conversion() throws IOException {
+        if(!authentication && !privacy && !compression){
+            writeToFile(filepath,message);
+        }
         Path path = Paths.get(filepath);
         String msg = readFromFileIntoString(filepath);
         Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(msg)));
@@ -172,8 +177,10 @@ public class PGPMessage {
      * @throws PGPException
      */
     public void privacy() throws IOException, PGPException {
-        encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
-        return;
+        if(!authentication) {
+            encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
+            return;
+        }
     }
 
     /**
@@ -182,6 +189,9 @@ public class PGPMessage {
      * @throws IOException
      */
     private void compression() throws IOException {
+        if(!privacy && !authentication){
+            writeToFile(filepath,message);
+        }
         String str = readFromFileIntoString(filepath);
         byte[] bytes = compress(str);
         ByteArrayOutputStream encOut = new ByteArrayOutputStream();
@@ -199,16 +209,20 @@ public class PGPMessage {
      * @throws PGPException
      */
     public void sendMessage() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
-        if (authentication && !privacy) {
+        if (authentication) {
             authentication();
         }
-        if (privacy && !authentication) {
+        if (privacy) {
             privacy();
         }
         if (authentication && privacy) {
             authenticationAndPrivacy();
         }
+<<<<<<< HEAD
+        if(compression){
+=======
         if (compression && !privacy) {
+>>>>>>> 925f60ab5c79b086331144b65c89b656315b1a6f
             compression();
         }
         if (conversion) {
@@ -230,7 +244,7 @@ public class PGPMessage {
     private static String signMessageByteArray(String message,
                                                PGPSecretKey secretKey,
                                                String passPhrase) throws IOException, PGPException {
-        System.out.println("usaoi u auth");
+
         byte[] messageCharArray = message.getBytes();
         PGPPrivateKey privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase.toCharArray()));
         PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(secretKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider("BC"));
