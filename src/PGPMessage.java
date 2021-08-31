@@ -272,51 +272,10 @@ public class PGPMessage {
      * @throws Exception
      */
     public static boolean verifyFile(
-            InputStream in)
+            InputStream in, JPanel mainPanel)
             throws Exception {
-        in = PGPUtil.getDecoderStream(in);
 
-        JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(in);
-
-        PGPCompressedData c1 = (PGPCompressedData) pgpFact.nextObject();
-
-        pgpFact = new JcaPGPObjectFactory(c1.getDataStream());
-
-        PGPOnePassSignatureList p1 = (PGPOnePassSignatureList) pgpFact.nextObject();
-
-        PGPOnePassSignature ops = p1.get(0);
-
-        PGPLiteralData p2 = (PGPLiteralData) pgpFact.nextObject();
-
-        InputStream dIn = p2.getInputStream();
-        int ch;
-        KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-
-        PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-        if (key == null) {
-            System.out.println("signature verification failed.");
-            return false;
-        }
-        FileOutputStream out = new FileOutputStream(p2.getFileName());
-
-        ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
-
-        while ((ch = dIn.read()) >= 0) {
-            ops.update((byte) ch);
-            out.write(ch);
-        }
-
-        out.close();
-
-        PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
-
-        if (ops.verify(p3.get(0))) {
-            System.out.println("signature verified.");
-            return true;
-        } else {
-            System.out.println("signature verification failed.");
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -407,6 +366,7 @@ public class PGPMessage {
      * @throws IOException
      */
     public static void decrypt(InputStream in, JPanel mainPanel) throws IOException {
+        System.out.println("USAO U DECRYPT");
         in = PGPUtil.getDecoderStream(in);
         try {
             JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
@@ -453,7 +413,7 @@ public class PGPMessage {
                 int result = fileChooser.showOpenDialog(mainPanel);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
-                   outFileName = selectedFile.getAbsolutePath();
+                    outFileName = selectedFile.getAbsolutePath();
                     if (!outFileName.substring(outFileName.lastIndexOf(".") + 1).equals("txt"))
                         outFileName += ".txt";
                 } else {
@@ -470,7 +430,51 @@ public class PGPMessage {
 
                 fOut.close();
             } else if (message instanceof PGPOnePassSignatureList) {
-                throw new PGPException("encrypted message contains a signed message - not literal data.");
+                PGPOnePassSignatureList p1 = (PGPOnePassSignatureList) message;
+
+                PGPOnePassSignature ops = p1.get(0);
+
+                PGPLiteralData p2 = (PGPLiteralData) pgpF.nextObject();
+
+                InputStream dIn = p2.getInputStream();
+                int                         ch;
+                PGPPublicKey key=KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
+                int result = fileChooser.showOpenDialog(mainPanel);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    outFileName = selectedFile.getAbsolutePath();
+                    if (!outFileName.substring(outFileName.lastIndexOf(".") + 1).equals("txt"))
+                        outFileName += ".txt";
+                } else {
+                    outFileName = p2.getFileName();
+                    if (outFileName.length() == 0) {
+                        outFileName = "defaultImeFajla";
+                    }
+                }
+                OutputStream fOut = new FileOutputStream(outFileName);
+                ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
+                while ((ch = dIn.read()) >= 0)
+                {
+                    ops.update((byte)ch);
+                    fOut.write(ch);
+                }
+
+                fOut.close();
+
+                PGPSignatureList            p3 = (PGPSignatureList)pgpF.nextObject();
+
+                if (ops.verify(p3.get(0)))
+                {
+                    System.out.println("signature verified.");
+                }
+                else
+                {
+                    System.out.println("signature verification failed.");
+                }
+
             } else {
                 throw new PGPException("message is not a simple encrypted file - type unknown.");
             }
