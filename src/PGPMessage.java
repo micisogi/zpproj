@@ -38,13 +38,6 @@ public class PGPMessage {
     int symmetricKeyAlgorithm;
     String filepath;
 
-    public String getChipherText() {
-        return chipherText;
-    }
-
-    String chipherText;
-
-
     public PGPMessage(String message,
                       long from,
                       List<Long> sendTo,
@@ -72,10 +65,20 @@ public class PGPMessage {
 
     }
 
+    /**
+     * A function used to get a filepath
+     *
+     * @return
+     */
     public String getFilepath() {
         return filepath;
     }
 
+    /**
+     * A function used to set a filepath
+     *
+     * @param filepath
+     */
     public void setFilepath(String filepath) {
         this.filepath = filepath;
     }
@@ -127,28 +130,65 @@ public class PGPMessage {
         return bos.toByteArray();
     }
 
+    /**
+     * A function used to sign and save message into a file
+     *
+     * @throws IOException
+     * @throws PGPException
+     * @throws NoSuchAlgorithmException
+     * @throws SignatureException
+     * @throws NoSuchProviderException
+     */
     public void authentication() throws IOException, PGPException, NoSuchAlgorithmException, SignatureException, NoSuchProviderException {
         System.out.println("Usao sam autentikacija");
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         message = signMessageByteArray(message, secretKey, passPhrase);
         writeToFile(filepath, message);
-        Path path = Paths.get("test");
-//        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(message)));
+
     }
 
+    /**
+     * A function used to sign, encrypt and save message into a file
+     *
+     * @throws IOException
+     * @throws PGPException
+     */
     public void authenticationAndPrivacy() throws IOException, PGPException {
         PGPSecretKey secretKey = KeyRingHelper.getInstance().getSecretKey(from);
         String messageSignature = signMessageByteArray(message, secretKey, passPhrase);
         encryptMessageUsingSessionKey(messageSignature, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
     }
 
-    public void conversion() {
-
+    public void conversion() throws IOException {
+        Path path = Paths.get(filepath);
+        String msg = readFromFileIntoString(filepath);
+        Files.write(path, Base64.getEncoder().encode(Strings.toByteArray(msg)));
     }
 
+    /**
+     * A function used to encrypt and save message into a file
+     *
+     * @throws IOException
+     * @throws PGPException
+     */
     public void privacy() throws IOException, PGPException {
         encryptMessageUsingSessionKey(message, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
         return;
+    }
+
+    /**
+     * A function used to compress and save into a file
+     *
+     * @throws IOException
+     */
+    private void compression() throws IOException {
+        String str = readFromFileIntoString(filepath);
+        byte[] bytes = compress(str);
+        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
+        OutputStream out = encOut;
+        out = new ArmoredOutputStream(out);
+        out.write(bytes);
+        out.close();
     }
 
 
@@ -168,10 +208,11 @@ public class PGPMessage {
         if (authentication && privacy) {
             authenticationAndPrivacy();
         }
-        if(compression){
-            String str = readFromFileIntoString(filepath);
-            byte[] bytes = compress(str);
-//            writeToFile();
+        if(compression && !privacy){
+            compression();
+        }
+        if(conversion){
+            conversion();
         }
 
     }
@@ -310,6 +351,7 @@ public class PGPMessage {
         return null;
     }
 
+
     private static String encodeFileToBase64(File file) {
         try {
             byte[] fileContent = Files.readAllBytes(file.toPath());
@@ -319,6 +361,12 @@ public class PGPMessage {
         }
     }
 
+    /**
+     * Function used to write a message into a file
+     *
+     * @param filepath
+     * @param message
+     */
     private static void writeToFile(String filepath, String message) {
         try {
             FileWriter fw = new FileWriter(filepath);
@@ -327,9 +375,15 @@ public class PGPMessage {
         } catch (Exception e) {
             System.out.println(e);
         }
-//        System.out.println("Success...");
+
     }
 
+    /**
+     * Function used to read a message from a file
+     *
+     * @param filePath
+     * @return
+     */
     private static String readFromFileIntoString(String filePath) {
         StringBuilder contentBuilder = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -344,49 +398,14 @@ public class PGPMessage {
         }
         return contentBuilder.toString();
     }
-//    public String encryptByteArray(byte[] clearData, List<PGPPublicKey> pgpPublicKeyList)
-//            throws IOException, PGPException, NoSuchProviderException {
-//
-//        ByteArrayOutputStream encOut = new ByteArrayOutputStream();
-//
-//        OutputStream out = encOut;
-//        out = new ArmoredOutputStream(out);
-//
-//        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-//
-//        PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
-//                PGPCompressedDataGenerator.ZIP);
-//        OutputStream cos = comData.open(bOut);
-//
-//        PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
-//
-//        OutputStream pOut = lData.open(cos, PGPLiteralData.BINARY, PGPLiteralData.CONSOLE, clearData.length, new Date());
-//        pOut.write(clearData);
-//
-//        lData.close();
-//        comData.close();
-//
-//        PGPEncryptedDataGenerator cPk = new PGPEncryptedDataGenerator(new JcePGPDataEncryptorBuilder(symmetricKeyAlgorithm).setWithIntegrityPacket(true).setSecureRandom(new SecureRandom()).setProvider("BC"));
-//        pgpPublicKeyList.forEach(pgpPublicKey -> {
-//            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(pgpPublicKey).setProvider("BC"));
-//        }););
-//
-//        cPk.addMethod(encKey);
-//
-//        byte[] bytes = bOut.toByteArray();
-//
-//        OutputStream cOut = cPk.open(out, bytes.length);
-//
-//        cOut.write(bytes); // obtain the actual bytes from the compressed stream
-//
-//        cOut.close();
-//
-//        out.close();
-//
-//        return encOut.toString();
-//    }
 
-
+    /**
+     * Function used to decrypt a message from a file
+     *
+     * @param in
+     * @param mainPanel
+     * @throws IOException
+     */
     public static void decrypt(InputStream in, JPanel mainPanel) throws IOException {
         in = PGPUtil.getDecoderStream(in);
         try {

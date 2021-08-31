@@ -540,53 +540,13 @@ public class mainGUI extends JFrame {
         }
         return null;
     }
-<<<<<<< HEAD
-//    public void saveMessage(String chipertex) {
-//        JFileChooser fileChooser = new JFileChooser();
-//        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-//        fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
-//        int result = fileChooser.showOpenDialog(mainPanel);
-//        if (result == JFileChooser.APPROVE_OPTION) {
-//            File selectedFile = fileChooser.getSelectedFile();
-//            String absolutePath = selectedFile.getAbsolutePath();
-//            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
-//                absolutePath += ".txt";
-//
-//            byte message[] = chipertex.getBytes(StandardCharsets.UTF_8);
-//            try (FileOutputStream fos = new FileOutputStream(absolutePath)) {
-//                fos.write(message);
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-=======
 
-    public void saveMessage(String chipertex) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
-        int result = fileChooser.showOpenDialog(mainPanel);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            String absolutePath = selectedFile.getAbsolutePath();
-            if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("txt"))
-                absolutePath += ".txt";
-
-            byte message[] = chipertex.getBytes(StandardCharsets.UTF_8);
-            try (FileOutputStream fos = new FileOutputStream(absolutePath)) {
-                fos.write(message);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
->>>>>>> 992b414d0448be07da733176ff6064046175504d
-
+    /**
+     * A function used to get list of selected recipients
+     *
+     * @param list
+     * @return
+     */
     private List<Long> getSelectedListItems(JList<SendToModel> list) {
         ArrayList<Long> returnList = new ArrayList<>();
         list.getSelectedValuesList().forEach(model -> {
