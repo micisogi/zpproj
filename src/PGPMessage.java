@@ -208,10 +208,10 @@ public class PGPMessage {
         if (authentication && privacy) {
             authenticationAndPrivacy();
         }
-        if(compression && !privacy){
+        if (compression && !privacy) {
             compression();
         }
-        if(conversion){
+        if (conversion) {
             conversion();
         }
 
@@ -288,7 +288,7 @@ public class PGPMessage {
      */
     public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode, String filepath) {
         try {
-        System.out.println("Usao sam ekripcija");
+            System.out.println("Usao sam ekripcija");
             OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
             byte[] bytes = compress(message);
 
@@ -351,8 +351,7 @@ public class PGPMessage {
             while ((sCurrentLine = br.readLine()) != null) {
                 contentBuilder.append(sCurrentLine).append("\n");
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return contentBuilder.toString();
@@ -398,9 +397,10 @@ public class PGPMessage {
             InputStream clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
             JcaPGPObjectFactory plainFact = new JcaPGPObjectFactory(clear);
             Object message = plainFact.nextObject();
+            JcaPGPObjectFactory pgpFact=new JcaPGPObjectFactory(in);;
             if (message instanceof PGPCompressedData) {
                 PGPCompressedData cData = (PGPCompressedData) message;
-                JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
+                pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
 
                 message = pgpFact.nextObject();
             }
@@ -434,11 +434,12 @@ public class PGPMessage {
 
                 PGPOnePassSignature ops = p1.get(0);
 
-                PGPLiteralData p2 = (PGPLiteralData) pgpF.nextObject();
+                PGPLiteralData p2 = (PGPLiteralData) pgpFact.nextObject();
 
                 InputStream dIn = p2.getInputStream();
-                int                         ch;
-                PGPPublicKey key=KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+                int ch;
+                PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+                System.out.println("KEY ID" +key.getKeyID());
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
                 fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
@@ -456,22 +457,18 @@ public class PGPMessage {
                 }
                 OutputStream fOut = new FileOutputStream(outFileName);
                 ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
-                while ((ch = dIn.read()) >= 0)
-                {
-                    ops.update((byte)ch);
+                while ((ch = dIn.read()) >= 0) {
+                    ops.update((byte) ch);
                     fOut.write(ch);
                 }
 
                 fOut.close();
 
-                PGPSignatureList            p3 = (PGPSignatureList)pgpF.nextObject();
+                PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
 
-                if (ops.verify(p3.get(0)))
-                {
+                if (ops.verify(p3.get(0))) {
                     System.out.println("signature verified.");
-                }
-                else
-                {
+                } else {
                     System.out.println("signature verification failed.");
                 }
 
