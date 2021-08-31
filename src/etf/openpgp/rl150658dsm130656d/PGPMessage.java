@@ -1,6 +1,7 @@
-package etf.openpgp.rl150658dsm130656d.models;
+package etf.openpgp.rl150658dsm130656d;
 
 import etf.openpgp.rl150658dsm130656d.models.User;
+import etf.openpgp.rl150658dsm130656d.utils.KeyRingHelper;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -9,7 +10,6 @@ import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.*;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
-import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

@@ -1,4 +1,4 @@
-package etf.openpgp.rl150658dsm130656d.models.utils;
+package etf.openpgp.rl150658dsm130656d.utils;
 
 import etf.openpgp.rl150658dsm130656d.models.User;
 import org.bouncycastle.openpgp.*;
