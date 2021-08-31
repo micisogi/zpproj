@@ -218,10 +218,14 @@ public class PGPMessage {
         if (authentication && privacy) {
             authenticationAndPrivacy();
         }
+<<<<<<< HEAD
         if(compression){
+=======
+        if (compression && !privacy) {
+>>>>>>> 925f60ab5c79b086331144b65c89b656315b1a6f
             compression();
         }
-        if(conversion){
+        if (conversion) {
             conversion();
         }
 
@@ -282,51 +286,10 @@ public class PGPMessage {
      * @throws Exception
      */
     public static boolean verifyFile(
-            InputStream in)
+            InputStream in, JPanel mainPanel)
             throws Exception {
-        in = PGPUtil.getDecoderStream(in);
 
-        JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(in);
-
-        PGPCompressedData c1 = (PGPCompressedData) pgpFact.nextObject();
-
-        pgpFact = new JcaPGPObjectFactory(c1.getDataStream());
-
-        PGPOnePassSignatureList p1 = (PGPOnePassSignatureList) pgpFact.nextObject();
-
-        PGPOnePassSignature ops = p1.get(0);
-
-        PGPLiteralData p2 = (PGPLiteralData) pgpFact.nextObject();
-
-        InputStream dIn = p2.getInputStream();
-        int ch;
-        KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-
-        PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
-        if (key == null) {
-            System.out.println("signature verification failed.");
-            return false;
-        }
-        FileOutputStream out = new FileOutputStream(p2.getFileName());
-
-        ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
-
-        while ((ch = dIn.read()) >= 0) {
-            ops.update((byte) ch);
-            out.write(ch);
-        }
-
-        out.close();
-
-        PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
-
-        if (ops.verify(p3.get(0))) {
-            System.out.println("signature verified.");
-            return true;
-        } else {
-            System.out.println("signature verification failed.");
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -339,7 +302,7 @@ public class PGPMessage {
      */
     public byte[] encryptMessageUsingSessionKey(String message, List<PGPPublicKey> pgpPublicKeyList, int symetricAlgoritmCode, String filepath) {
         try {
-        System.out.println("Usao sam ekripcija");
+            System.out.println("Usao sam ekripcija");
             OutputStream out = new ArmoredOutputStream(new BufferedOutputStream(new FileOutputStream(filepath)));
             byte[] bytes = compress(message);
 
@@ -402,8 +365,7 @@ public class PGPMessage {
             while ((sCurrentLine = br.readLine()) != null) {
                 contentBuilder.append(sCurrentLine).append("\n");
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return contentBuilder.toString();
@@ -417,6 +379,7 @@ public class PGPMessage {
      * @throws IOException
      */
     public static void decrypt(InputStream in, JPanel mainPanel) throws IOException {
+        System.out.println("USAO U DECRYPT");
         in = PGPUtil.getDecoderStream(in);
         try {
             JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(in);
@@ -440,13 +403,18 @@ public class PGPMessage {
                 myChars[0] = '"';
                 sKey = KeyRingHelper.getInstance().getPrivateKey(pbe.getKeyID(), myChars);
             }
+            if (sKey == null) {
+                JOptionPane.showMessageDialog(null, "There is no private key for decryption");
+                return;
+            }
 
             InputStream clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
             JcaPGPObjectFactory plainFact = new JcaPGPObjectFactory(clear);
             Object message = plainFact.nextObject();
+            JcaPGPObjectFactory pgpFact=new JcaPGPObjectFactory(in);;
             if (message instanceof PGPCompressedData) {
                 PGPCompressedData cData = (PGPCompressedData) message;
-                JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
+                pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
 
                 message = pgpFact.nextObject();
             }
@@ -459,7 +427,7 @@ public class PGPMessage {
                 int result = fileChooser.showOpenDialog(mainPanel);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
-                   outFileName = selectedFile.getAbsolutePath();
+                    outFileName = selectedFile.getAbsolutePath();
                     if (!outFileName.substring(outFileName.lastIndexOf(".") + 1).equals("txt"))
                         outFileName += ".txt";
                 } else {
@@ -476,7 +444,48 @@ public class PGPMessage {
 
                 fOut.close();
             } else if (message instanceof PGPOnePassSignatureList) {
-                throw new PGPException("encrypted message contains a signed message - not literal data.");
+                PGPOnePassSignatureList p1 = (PGPOnePassSignatureList) message;
+
+                PGPOnePassSignature ops = p1.get(0);
+
+                PGPLiteralData p2 = (PGPLiteralData) pgpFact.nextObject();
+
+                InputStream dIn = p2.getInputStream();
+                int ch;
+                PGPPublicKey key = KeyRingHelper.getInstance().getPublicKey(ops.getKeyID());
+                System.out.println("KEY ID" +key.getKeyID());
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
+                int result = fileChooser.showOpenDialog(mainPanel);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    outFileName = selectedFile.getAbsolutePath();
+                    if (!outFileName.substring(outFileName.lastIndexOf(".") + 1).equals("txt"))
+                        outFileName += ".txt";
+                } else {
+                    outFileName = p2.getFileName();
+                    if (outFileName.length() == 0) {
+                        outFileName = "defaultImeFajla";
+                    }
+                }
+                OutputStream fOut = new FileOutputStream(outFileName);
+                ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
+                while ((ch = dIn.read()) >= 0) {
+                    ops.update((byte) ch);
+                    fOut.write(ch);
+                }
+
+                fOut.close();
+
+                PGPSignatureList p3 = (PGPSignatureList) pgpFact.nextObject();
+
+                if (ops.verify(p3.get(0))) {
+                    System.out.println("signature verified.");
+                } else {
+                    System.out.println("signature verification failed.");
+                }
+
             } else {
                 throw new PGPException("message is not a simple encrypted file - type unknown.");
             }
