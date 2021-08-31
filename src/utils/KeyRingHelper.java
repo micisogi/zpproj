@@ -459,6 +459,13 @@ public class KeyRingHelper {
 
     }
 
+    /**
+     * A helper function used to check if password for the secret key matches
+     *
+     * @param userId
+     * @param ch
+     * @return
+     */
     public PGPPrivateKey getPrivateKey(long userId, char[] ch) {
 
         PGPSecretKey secret = getSecretKey(userId);
@@ -515,4 +522,28 @@ public class KeyRingHelper {
             return returnList;
         }
     }
+
+    /**
+     * A function used to verufy password before delition
+     *
+     * @param keyId
+     * @param type
+     * @return
+     * @throws PGPException
+     * @throws IOException
+     */
+    public boolean verifyPassPhrase(long keyId, String type) throws PGPException, IOException {
+        if (type.equals("PUBLIC")) return true;
+        else {
+            String passPhrase = JOptionPane.showInputDialog("Enter a password for the private key");
+            PGPPrivateKey privKey = KeyRingHelper.getInstance().getPrivateKey(keyId, passPhrase.toCharArray());
+
+            if (privKey == null) return true;
+            else {
+            System.out.println("VERIFIED SECRET KEY:" + privKey.getKeyID());
+                return true;
+            }
+        }
+    }
+
 }
