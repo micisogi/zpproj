@@ -356,6 +356,12 @@ public class mainGUI extends JFrame {
         });
     }
 
+    /**
+     * The main function
+     *
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         JFrame frame = new mainGUI("ZP PROJEKAT UBI ME");
@@ -379,9 +385,12 @@ public class mainGUI extends JFrame {
                     int row = table1.getSelectedRow();
                     String hexValue = table1.getModel().getValueAt(row, iDColumn).toString();
                     try {
+                       if (!KeyRingHelper.getInstance().verifyPassPhrase(Utils.getInstance().hexStringToLongID(hexValue),table1.getModel().getValueAt(row, 5).toString())){
+                           return;
+                       }
                         KeyRingHelper.getInstance().deleteKeyRing(hexValue);
                         model.removeRow(table1.getSelectedRow());
-                    } catch (IOException e) {
+                    } catch (IOException | PGPException e) {
                         e.printStackTrace();
 
                     }

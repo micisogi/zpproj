@@ -161,6 +161,11 @@ public class PGPMessage {
         encryptMessageUsingSessionKey(messageSignature, KeyRingHelper.getInstance().getPublicKeysBasedOnKeys(sendTo), symmetricKeyAlgorithm, filepath);
     }
 
+    /**
+     * A function used to convert a message from a file
+     *
+     * @throws IOException
+     */
     public void conversion() throws IOException {
         if(!authentication && !privacy && !compression){
             writeToFile(filepath,message);
@@ -218,11 +223,7 @@ public class PGPMessage {
         if (authentication && privacy) {
             authenticationAndPrivacy();
         }
-<<<<<<< HEAD
         if(compression){
-=======
-        if (compression && !privacy) {
->>>>>>> 925f60ab5c79b086331144b65c89b656315b1a6f
             compression();
         }
         if (conversion) {
@@ -323,16 +324,16 @@ public class PGPMessage {
         }
         return null;
     }
-
-
-    private static String encodeFileToBase64(File file) {
-        try {
-            byte[] fileContent = Files.readAllBytes(file.toPath());
-            return Base64.getEncoder().encodeToString(fileContent);
-        } catch (IOException e) {
-            throw new IllegalStateException("could not read file " + file, e);
-        }
-    }
+//
+//
+//    private static String encodeFileToBase64(File file) {
+//        try {
+//            byte[] fileContent = Files.readAllBytes(file.toPath());
+//            return Base64.getEncoder().encodeToString(fileContent);
+//        } catch (IOException e) {
+//            throw new IllegalStateException("could not read file " + file, e);
+//        }
+//    }
 
     /**
      * Function used to write a message into a file
