@@ -1,4 +1,4 @@
-package etf.openpgp.rl150658dsm130656d.models.utils;
+package etf.openpgp.rl150658dsm130656d.utils;
 
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;

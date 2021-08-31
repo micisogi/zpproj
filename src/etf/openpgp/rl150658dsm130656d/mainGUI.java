@@ -1,14 +1,14 @@
-package etf.openpgp.rl150658dsm130656d.models;
+package etf.openpgp.rl150658dsm130656d;
 
 import etf.openpgp.rl150658dsm130656d.models.FromModel;
 import etf.openpgp.rl150658dsm130656d.models.SendToModel;
+import etf.openpgp.rl150658dsm130656d.utils.KeyRingHelper;
+import etf.openpgp.rl150658dsm130656d.utils.Utils;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import etf.openpgp.rl150658dsm130656d.models.utils.KeyRingHelper;
-import etf.openpgp.rl150658dsm130656d.models.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

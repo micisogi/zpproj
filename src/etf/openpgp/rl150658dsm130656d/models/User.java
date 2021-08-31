@@ -1,9 +1,9 @@
 package etf.openpgp.rl150658dsm130656d.models;
 
+import etf.openpgp.rl150658dsm130656d.utils.Utils;
 import org.bouncycastle.openpgp.PGPKeyRing;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import etf.openpgp.rl150658dsm130656d.models.utils.Utils;
 
 import java.util.Date;
 
